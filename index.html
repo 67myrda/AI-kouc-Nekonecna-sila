@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AI kouč – Nekonečná síla</title>
+<meta name="theme-color" content="#14121f">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600..900&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- SVG symboly (ikony + gradient definice) -->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <linearGradient id="ring-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff6a4d"/>
+      <stop offset="100%" stop-color="#7c6bf0"/>
+    </linearGradient>
+
+    <symbol id="icon-today" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2 13.4 9.4 20 12 13.4 14.6 12 22 10.6 14.6 4 12 10.6 9.4Z"/></symbol>
+    <symbol id="icon-coach" viewBox="0 0 24 24"><path fill="currentColor" d="M4 4h16v12H7l-3 3Z"/></symbol>
+    <symbol id="icon-goals" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="1" fill="currentColor"/></symbol>
+    <symbol id="icon-values" viewBox="0 0 24 24"><path fill="currentColor" d="M12 21s-7-4.5-9.5-9C.7 8 2.3 4 6 4c2 0 3.5 1.1 4 2.4C10.5 5.1 12 4 14 4c3.7 0 5.3 4 3.5 8-2.5 4.5-9.5 9-9.5 9Z"/></symbol>
+    <symbol id="icon-concepts" viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="2" fill="currentColor"/><rect x="13" y="3" width="8" height="8" rx="2" fill="currentColor" opacity=".6"/><rect x="3" y="13" width="8" height="8" rx="2" fill="currentColor" opacity=".6"/><rect x="13" y="13" width="8" height="8" rx="2" fill="currentColor" opacity=".35"/></symbol>
+    <symbol id="icon-capsule" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2 3 7v10l9 5 9-5V7Zm0 2.3L18.5 8 12 11.7 5.5 8Z"/></symbol>
+    <symbol id="icon-bell" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a6 6 0 0 0-6 6v4l-2 4h16l-2-4V8a6 6 0 0 0-6-6Zm0 20a3 3 0 0 0 3-3H9a3 3 0 0 0 3 3Z"/></symbol>
+    <symbol id="icon-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="2" fill="currentColor"/><circle cx="12" cy="12" r="2" fill="currentColor"/><circle cx="19" cy="12" r="2" fill="currentColor"/></symbol>
+
+    <!-- vlastní "jiskra" — inspirace tvým logem, vlastní kresba (ne kopie loga Anthropicu) -->
+    <symbol id="icon-spark" viewBox="0 0 100 100">
+      <g fill="currentColor">
+        <path d="M50 4 L56 44 L50 50 L44 44 Z"/>
+        <path d="M50 96 L44 56 L50 50 L56 56 Z"/>
+        <path d="M4 50 L44 44 L50 50 L44 56 Z"/>
+        <path d="M96 50 L56 56 L50 50 L56 44 Z"/>
+        <path d="M18 18 L48 42 L50 50 L42 48 Z"/>
+        <path d="M82 82 L52 58 L50 50 L58 52 Z"/>
+        <path d="M82 18 L58 48 L50 50 L52 42 Z"/>
+        <path d="M18 82 L42 52 L50 50 L48 58 Z"/>
+      </g>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="app">
+
+  <!-- ===================== POSTRANNÍ MENU (tablet/desktop) ===================== -->
+  <nav class="sidenav" aria-label="Hlavní navigace">
+    <div class="sidenav__brand">
+      <svg class="spark-icon" viewBox="0 0 100 100"><use href="#icon-spark"/></svg>
+      <span class="sidenav__brand-text">AI kouč<small>Nekonečná síla</small></span>
+    </div>
+
+    <ul class="sidenav__list" id="nav-list">
+      <li><button class="navlink" data-view="dnes"><svg><use href="#icon-today"/></svg>Dnes</button></li>
+      <li><button class="navlink" data-view="kouc"><svg><use href="#icon-coach"/></svg>AI kouč</button></li>
+      <li><button class="navlink" data-view="cile"><svg><use href="#icon-goals"/></svg>Cíle</button></li>
+      <li><button class="navlink" data-view="hodnoty"><svg><use href="#icon-values"/></svg>Hodnoty</button></li>
+      <li><button class="navlink" data-view="techniky"><svg><use href="#icon-concepts"/></svg>Techniky</button></li>
+      <li><button class="navlink" data-view="denik"><svg><use href="#icon-capsule"/></svg>Deník &amp; schránka</button></li>
+      <li><button class="navlink" data-view="pripominky"><svg><use href="#icon-bell"/></svg>Připomínky</button></li>
+    </ul>
+
+    <div class="sidenav__footer">
+      <svg class="spark-icon" viewBox="0 0 100 100"><use href="#icon-spark"/></svg>
+      AI coach © ⁶⁷〽️ &amp; Claude✦ 2026
+    </div>
+  </nav>
+
+  <!-- ===================== HLAVNÍ OBSAH ===================== -->
+  <main class="main">
+
+    <!-- ---------- DNES ---------- -->
+    <section class="view" id="view-dnes" data-view="dnes">
+      <div class="view__header">
+        <span class="eyebrow">Neděle, 26. července</span>
+        <h1>Dobrý den 👋</h1>
+        <p class="view__lede">Tady začíná každá lekce. Téma dneška navrhuju já podle toho, co jsme naposledy probírali — nebo si klidně vyber vlastní.</p>
+      </div>
+
+      <div class="today-hero">
+        <div class="spark-ring">
+          <svg viewBox="0 0 120 120">
+            <circle class="track" cx="60" cy="60" r="55"/>
+            <circle class="progress" cx="60" cy="60" r="55"/>
+          </svg>
+          <div class="spark-ring__label">
+            <span class="spark-ring__count">1/3<small>dnešní kroky</small></span>
+          </div>
+        </div>
+        <div class="today-hero__text">
+          <span class="badge">Koncept 02 — Stav</span>
+          <h2 class="today-hero__theme">Vědomá změna stavu před náročnou chvílí</h2>
+          <p class="card__body">Krátké cvičení na fyziologii a zaměření pozornosti — přesně to, co appka po tobě chce, než se pustíme do dnešního rozhovoru.</p>
+          <div class="today-hero__actions">
+            <button class="btn btn--primary">Spustit dnešní lekci</button>
+            <button class="btn btn--ghost">Vybrat jiné téma</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="streak-strip">
+        <div class="streak-chip"><div class="streak-chip__num">0</div><div class="streak-chip__label">dní v řadě</div></div>
+        <div class="streak-chip"><div class="streak-chip__num">0/5</div><div class="streak-chip__label">konceptů splněno</div></div>
+        <div class="streak-chip"><div class="streak-chip__num">0</div><div class="streak-chip__label">cílů aktivních</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card__title">Fáze 1 — tohle je zatím kostra appky</div>
+        <p class="card__body">Čísla a data na téhle obrazovce jsou zástupná. Ve Fázi 2 appka začne ukládat tvůj skutečný pokrok do databáze a Fáze 3 přidá živého AI kouče do chatu vedle.</p>
+      </div>
+    </section>
+
+    <!-- ---------- AI KOUČ ---------- -->
+    <section class="view" id="view-kouc" data-view="kouc">
+      <div class="view__header">
+        <span class="eyebrow">AI kouč</span>
+        <h1>Rozhovor s koučem</h1>
+        <p class="view__lede">Ve Fázi 3 tu poběží skutečná konverzace se mnou, napojená na tvoje cíle a historii. Teď je tu jen ukázka rozvržení.</p>
+      </div>
+
+      <div class="chat-shell">
+        <div class="chat-bubble chat-bubble--coach">Ahoj! Na čem chceš dneska pracovat — na stavu, na přesvědčení, nebo si probereme cíl?</div>
+        <div class="chat-bubble chat-bubble--user">Chci se podívat na to kotvení.</div>
+        <div class="chat-bubble chat-bubble--coach">Výborně. Než začneme, vybav si moment, kdy jsi měl/a naprostou jistotu…</div>
+        <div class="chat-input-row">
+          <input type="text" placeholder="Napiš zprávu (funkční až od Fáze 3)…" disabled>
+          <button class="btn btn--primary" disabled>Odeslat</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- CÍLE ---------- -->
+    <section class="view" id="view-cile" data-view="cile">
+      <div class="view__header">
+        <span class="eyebrow">Cíle · Outcome Thinking</span>
+        <h1>Tvoje cíle</h1>
+        <p class="view__lede">12krokový postup podle Nekonečné síly — vedený mnou v rozhovoru, ne jen formulář k vyplnění o samotě.</p>
+      </div>
+
+      <div class="empty-state card">
+        <h3>Zatím žádný aktivní cíl</h3>
+        <p>Než řekneš „jak“, pojďme si nejdřív ujasnit „co“ vlastně chceš. Tohle přijde na řadu ve Fázi 2 — teď se podívej, jak bude 12 kroků vypadat:</p>
+      </div>
+
+      <div class="card" style="margin-top:1.5rem">
+        <div class="card__title">Náhled 12 kroků</div>
+        <div class="steps">
+          <div class="step-row"><span class="step-row__num"></span><span class="step-row__text">Popiš výsledek pozitivně — co chceš, ne čemu se chceš vyhnout</span></div>
+          <div class="step-row"><span class="step-row__num"></span><span class="step-row__text">Zkonkretizuj — kdy, kde, s kým, jak to poznáš</span></div>
+          <div class="step-row"><span class="step-row__num"></span><span class="step-row__text">Ověř zdroje, které už máš k dispozici</span></div>
+          <div class="step-row"><span class="step-row__num"></span><span class="step-row__text">Popiš, co ti dosud stálo v cestě</span></div>
+          <div class="step-row"><span class="step-row__num"></span><span class="step-row__text">… zbylých 8 kroků doplníme ve Fázi 2</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- HODNOTY ---------- -->
+    <section class="view" id="view-hodnoty" data-view="hodnoty">
+      <div class="view__header">
+        <span class="eyebrow">Hodnoty</span>
+        <h1>Co je pro tebe důležité</h1>
+        <p class="view__lede">Bez vědomé hierarchie hodnot vznikají vnitřní konflikty — tak to popisuje i kniha. Rozděleno podle oblastí života.</p>
+      </div>
+
+      <div class="value-areas">
+        <div class="value-area"><div class="value-area__count">0</div><div class="value-area__label">Práce / Kariéra</div></div>
+        <div class="value-area"><div class="value-area__count">0</div><div class="value-area__label">Vztahy / Rodina</div></div>
+        <div class="value-area"><div class="value-area__count">0</div><div class="value-area__label">Zdraví / Tělo</div></div>
+        <div class="value-area"><div class="value-area__count">0</div><div class="value-area__label">Osobní růst</div></div>
+        <div class="value-area"><div class="value-area__count">0</div><div class="value-area__label">Finance</div></div>
+        <div class="value-area"><div class="value-area__count">0</div><div class="value-area__label">Volný čas</div></div>
+      </div>
+    </section>
+
+    <!-- ---------- TECHNIKY ---------- -->
+    <section class="view" id="view-techniky" data-view="techniky">
+      <div class="view__header">
+        <span class="eyebrow">Techniky a koncepty</span>
+        <h1>Pět pilířů Nekonečné síly</h1>
+        <p class="view__lede">Ke každému konceptu patří stručný výklad a praktické cvičení, které jde vyzkoušet ještě dnes.</p>
+      </div>
+
+      <div class="concept-grid">
+        <div class="concept-card">
+          <span class="concept-card__num">KONCEPT 01 — MODELOVÁNÍ</span>
+          <h3>Modelování</h3>
+          <p>Pokud někdo dosáhl mimořádného výsledku, jeho cesta je opakovatelná — přesvědčení, fyziologie, mentální syntaxe.</p>
+        </div>
+        <div class="concept-card">
+          <span class="concept-card__num">KONCEPT 02 — STAV</span>
+          <h3>Stav</h3>
+          <p>Tvé výsledky vychází ze stavu, ve kterém jednáš. Stav lze vědomě měnit fyziologií i zaměřením pozornosti.</p>
+        </div>
+        <div class="concept-card">
+          <span class="concept-card__num">KONCEPT 03 — PŘESVĚDČENÍ</span>
+          <h3>Přesvědčení</h3>
+          <p>Sedm posilujících přesvědčení, která fungují jako filtr reality a nasměrovávají chování.</p>
+        </div>
+        <div class="concept-card">
+          <span class="concept-card__num">KONCEPT 04 — KOTVENÍ</span>
+          <h3>Kotvení</h3>
+          <p>Smyslový spouštěč, který kdykoli vyvolá zdrojný emocionální stav.</p>
+        </div>
+        <div class="concept-card">
+          <span class="concept-card__num">KONCEPT 05 — KOMUNIKACE</span>
+          <h3>Komunikace</h3>
+          <p>Raport, zrcadlení a agreement frame jako základ ovlivňování bez manipulace.</p>
+        </div>
+        <div class="concept-card concept-card--locked">
+          <span class="concept-card__num">MODUL — ROZŠÍŘENÍ</span>
+          <h3>Čtyři dohody 🔒</h3>
+          <p>Odemkne se ve Fázi 5, spolu s SMART/WOOP cíli a growth mindset.</p>
+        </div>
+      </div>
+
+      <div class="module-note">Cvičení a ukládání poznámek ke konceptům přijde ve Fázi 2–3, spolu s ukládáním do databáze.</div>
+    </section>
+
+    <!-- ---------- DENÍK / ČASOVÁ SCHRÁNKA ---------- -->
+    <section class="view" id="view-denik" data-view="denik">
+      <div class="view__header">
+        <span class="eyebrow">Deník &amp; časová schránka</span>
+        <h1>Tvoje poznámky napříč časem</h1>
+        <p class="view__lede">Inspirováno tvým vlastním sešitem — appka umí „zapečetit“ cíle a připomenout ti je za rok nebo za pět let.</p>
+      </div>
+
+      <div class="capsule-card">
+        <svg class="spark-icon" viewBox="0 0 24 24" style="width:28px;height:28px;color:var(--gold)"><use href="#icon-capsule"/></svg>
+        <h3>Časová schránka</h3>
+        <p>Napiš si dnešní cíle a appka ti je připomene v budoucnu — přesně jako ten sešit, který jsi po patnácti letech znovu otevřel. Funkční ukládání přijde ve Fázi 2.</p>
+        <button class="btn btn--primary" style="margin-top:1rem" disabled>Vytvořit schránku (Fáze 2)</button>
+      </div>
+
+      <div class="empty-state card" style="margin-top:1.5rem">
+        <h3>Zatím žádný zápis</h3>
+        <p>Běžné deníkové zápisky z lekcí a cvičení se tu budou hromadit postupně.</p>
+      </div>
+    </section>
+
+    <!-- ---------- PŘIPOMÍNKY ---------- -->
+    <section class="view" id="view-pripominky" data-view="pripominky">
+      <div class="view__header">
+        <span class="eyebrow">Připomínky</span>
+        <h1>Denní i týdenní rytmus</h1>
+        <p class="view__lede">Rozsah notifikací (v appce vs. e-mailem) doladíme ve Fázi 4 — zatím náhled nastavení.</p>
+      </div>
+
+      <div class="card">
+        <div class="toggle-row">
+          <div class="toggle-row__text"><strong>Denní cvičení</strong><span>Krátká technika ze zvoleného konceptu</span></div>
+          <div class="toggle is-on"></div>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-row__text"><strong>Týdenní kontrola cílů</strong><span>Připomenutí přejít aktivní cíle</span></div>
+          <div class="toggle is-on"></div>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-row__text"><strong>Časová schránka</strong><span>Upozornění, když se otevře zapečetěný zápis</span></div>
+          <div class="toggle"></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ===================== SPODNÍ NAVIGACE (mobil) ===================== -->
+<nav class="bottomnav" aria-label="Hlavní navigace (mobil)">
+  <button class="bottomnav__item" data-view="dnes"><svg><use href="#icon-today"/></svg>Dnes</button>
+  <button class="bottomnav__item" data-view="kouc"><svg><use href="#icon-coach"/></svg>Kouč</button>
+  <button class="bottomnav__item" data-view="cile"><svg><use href="#icon-goals"/></svg>Cíle</button>
+  <button class="bottomnav__item" id="more-trigger"><svg><use href="#icon-more"/></svg>Více</button>
+</nav>
+
+<div class="more-sheet" id="more-sheet">
+  <div class="more-sheet__panel">
+    <div class="more-sheet__grip"></div>
+    <div class="more-sheet__list">
+      <button class="navlink" data-view="hodnoty"><svg><use href="#icon-values"/></svg>Hodnoty</button>
+      <button class="navlink" data-view="techniky"><svg><use href="#icon-concepts"/></svg>Techniky</button>
+      <button class="navlink" data-view="denik"><svg><use href="#icon-capsule"/></svg>Deník &amp; schránka</button>
+      <button class="navlink" data-view="pripominky"><svg><use href="#icon-bell"/></svg>Připomínky</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
