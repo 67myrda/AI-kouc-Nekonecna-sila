@@ -7,9 +7,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/fireba
 import {
   getAuth,
   GoogleAuthProvider,
-  signInWithPopup,
-  signInWithRedirect,
-  getRedirectResult,
+  signInWithCredential,
   signOut,
   onAuthStateChanged,
   setPersistence,
@@ -40,8 +38,12 @@ const ALLOWED_EMAILS = [
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
 setPersistence(auth, browserLocalPersistence).catch((err) => console.error(err));
+
+// Web Client ID pro Google Identity Services (GIS) — obchází problém
+// s roztrženou pamětí mezi doménami appky a Firebase auth handlerem,
+// který postihoval signInWithPopup/signInWithRedirect na mobilu.
+const GIS_CLIENT_ID = "195301831250-r2h122o8puesq179uos6oqjerm0fjfik.apps.googleusercontent.com";
 
 export { app, auth };
 
@@ -87,41 +89,50 @@ onAuthStateChanged(auth, (user) => {
 
 let loginInProgress = false;
 const loginBtn = document.getElementById("login-btn");
+let tokenClient = null;
 
-loginBtn.addEventListener("click", async () => {
+function ensureTokenClient() {
+  if (tokenClient) return tokenClient;
+  if (!window.google?.accounts?.oauth2) return null;
+
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: GIS_CLIENT_ID,
+    scope: "email profile openid",
+    callback: async (tokenResponse) => {
+      if (tokenResponse.error) {
+        console.error("GIS chyba:", tokenResponse);
+        alert("Přihlášení se nezdařilo. Zkus to prosím znovu.");
+        loginInProgress = false;
+        loginBtn.disabled = false;
+        return;
+      }
+      try {
+        const credential = GoogleAuthProvider.credential(null, tokenResponse.access_token);
+        await signInWithCredential(auth, credential);
+      } catch (err) {
+        console.error(err);
+        alert("Přihlášení se nezdařilo. Zkus to prosím znovu. (" + err.code + ")");
+      } finally {
+        loginInProgress = false;
+        loginBtn.disabled = false;
+      }
+    },
+  });
+  return tokenClient;
+}
+
+loginBtn.addEventListener("click", () => {
   if (loginInProgress) return;
+
+  const client = ensureTokenClient();
+  if (!client) {
+    alert("Přihlašovací služba se ještě načítá. Zkus to prosím za pár vteřin znovu.");
+    return;
+  }
+
   loginInProgress = true;
   loginBtn.disabled = true;
-
-  try {
-    await signInWithPopup(auth, provider);
-  } catch (err) {
-    console.error("Popup selhal:", err.code);
-    const fallbackCodes = [
-      "auth/popup-blocked",
-      "auth/cancelled-popup-request",
-      "auth/popup-closed-by-user",
-    ];
-    if (fallbackCodes.includes(err.code)) {
-      try {
-        await signInWithRedirect(auth, provider);
-        return; // stránka se teď přesměruje pryč, dál už není co dělat
-      } catch (err2) {
-        console.error("Redirect taky selhal:", err2.code);
-        alert("Přihlášení se nezdařilo. Zkus to prosím znovu. (" + err2.code + ")");
-      }
-    } else {
-      alert("Přihlášení se nezdařilo. Zkus to prosím znovu. (" + err.code + ")");
-    }
-  } finally {
-    loginInProgress = false;
-    loginBtn.disabled = false;
-  }
-});
-
-getRedirectResult(auth).catch((err) => {
-  console.error(err);
-  alert("Přihlášení se nezdařilo. Zkus to prosím znovu. (" + err.code + ")");
+  client.requestAccessToken();
 });
 
 document.getElementById("logout-btn").addEventListener("click", () => {
