@@ -7,7 +7,8 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/fireba
 import {
   getAuth,
   GoogleAuthProvider,
-  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   signOut,
   onAuthStateChanged,
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
@@ -81,10 +82,12 @@ onAuthStateChanged(auth, (user) => {
 });
 
 document.getElementById("login-btn").addEventListener("click", () => {
-  signInWithPopup(auth, provider).catch((err) => {
-    console.error(err);
-    alert("Přihlášení se nezdařilo. Zkus to prosím znovu. (" + err.code + ")");
-  });
+  signInWithRedirect(auth, provider);
+});
+
+getRedirectResult(auth).catch((err) => {
+  console.error(err);
+  alert("Přihlášení se nezdařilo. Zkus to prosím znovu. (" + err.code + ")");
 });
 
 document.getElementById("logout-btn").addEventListener("click", () => {
