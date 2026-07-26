@@ -7,10 +7,13 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/fireba
 import {
   getAuth,
   GoogleAuthProvider,
+  signInWithPopup,
   signInWithRedirect,
   getRedirectResult,
   signOut,
   onAuthStateChanged,
+  setPersistence,
+  browserLocalPersistence,
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 
 // Tahle konfigurace je veřejná záměrně — Firebase apiKey není tajný klíč,
@@ -38,6 +41,7 @@ const ALLOWED_EMAILS = [
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
+setPersistence(auth, browserLocalPersistence).catch((err) => console.error(err));
 
 export { app, auth };
 
@@ -81,8 +85,38 @@ onAuthStateChanged(auth, (user) => {
   unlock();
 });
 
-document.getElementById("login-btn").addEventListener("click", () => {
-  signInWithRedirect(auth, provider);
+let loginInProgress = false;
+const loginBtn = document.getElementById("login-btn");
+
+loginBtn.addEventListener("click", async () => {
+  if (loginInProgress) return;
+  loginInProgress = true;
+  loginBtn.disabled = true;
+
+  try {
+    await signInWithPopup(auth, provider);
+  } catch (err) {
+    console.error("Popup selhal:", err.code);
+    const fallbackCodes = [
+      "auth/popup-blocked",
+      "auth/cancelled-popup-request",
+      "auth/popup-closed-by-user",
+    ];
+    if (fallbackCodes.includes(err.code)) {
+      try {
+        await signInWithRedirect(auth, provider);
+        return; // stránka se teď přesměruje pryč, dál už není co dělat
+      } catch (err2) {
+        console.error("Redirect taky selhal:", err2.code);
+        alert("Přihlášení se nezdařilo. Zkus to prosím znovu. (" + err2.code + ")");
+      }
+    } else {
+      alert("Přihlášení se nezdařilo. Zkus to prosím znovu. (" + err.code + ")");
+    }
+  } finally {
+    loginInProgress = false;
+    loginBtn.disabled = false;
+  }
 });
 
 getRedirectResult(auth).catch((err) => {
