@@ -12,7 +12,27 @@
 
 <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="is-locked">
+
+<!-- ===================== PŘIHLAŠOVACÍ BRÁNA (Fáze 2a) ===================== -->
+<div class="auth-gate" id="auth-gate">
+  <div class="auth-gate__panel">
+    <svg class="spark-icon auth-gate__spark" viewBox="0 0 100 100"><use href="#icon-spark"/></svg>
+
+    <div id="auth-gate-login">
+      <h1>AI kouč<br>Nekonečná síla</h1>
+      <p>Appka je uzamčená jen pro pozvané. Přihlas se přes svůj Google účet.</p>
+      <button class="btn btn--primary" id="login-btn">Přihlásit se přes Google</button>
+      <p class="auth-gate__note">Nic se neukládá, dokud se nepřihlásíš.</p>
+    </div>
+
+    <div id="auth-gate-denied" style="display:none">
+      <h1>Tenhle e-mail nemá přístup</h1>
+      <p>Jsi přihlášen/a jako <strong id="denied-email"></strong>. Pokud si myslíš, že bys přístup mít měl/a, ozvi se Myrdovi, ať tě přidá.</p>
+      <button class="btn btn--ghost" id="logout-btn">Zkusit jiný účet</button>
+    </div>
+  </div>
+</div>
 
 <!-- SVG symboly (ikony + gradient definice) -->
 <svg width="0" height="0" style="position:absolute">
@@ -65,6 +85,11 @@
       <li><button class="navlink" data-view="denik"><svg><use href="#icon-capsule"/></svg>Deník &amp; schránka</button></li>
       <li><button class="navlink" data-view="pripominky"><svg><use href="#icon-bell"/></svg>Připomínky</button></li>
     </ul>
+
+    <div class="user-chip">
+      <span id="user-chip">—</span>
+      <button class="user-chip__logout" id="logout-btn-sidenav" title="Odhlásit se">Odhlásit</button>
+    </div>
 
     <div class="sidenav__footer">
       <svg class="spark-icon" viewBox="0 0 100 100"><use href="#icon-spark"/></svg>
@@ -291,5 +316,6 @@
 </div>
 
 <script src="app.js"></script>
+<script type="module" src="firebase-init.js"></script>
 </body>
 </html>

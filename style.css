@@ -91,6 +91,91 @@ a{ color: inherit; }
 }
 
 /* ============================================================
+   Přihlašovací brána (Fáze 2a)
+   ============================================================ */
+
+.auth-gate{
+  display: none;
+  position: fixed; inset: 0;
+  z-index: 100;
+  align-items: center; justify-content: center;
+  padding: var(--space-md);
+  background: var(--bg);
+  background-image:
+    radial-gradient(ellipse 900px 500px at 15% -10%, rgba(124,107,240,0.20), transparent 60%),
+    radial-gradient(ellipse 700px 500px at 100% 0%, rgba(255,106,77,0.14), transparent 55%);
+}
+
+body.is-locked .auth-gate{ display: flex; }
+body.is-locked .app{ display: none; }
+body.is-locked .bottomnav{ display: none; }
+
+.auth-gate__panel{
+  max-width: 380px;
+  text-align: center;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl) var(--space-lg);
+}
+
+.auth-gate__spark{
+  width: 40px; height: 40px;
+  color: var(--flame);
+  margin: 0 auto var(--space-md);
+  display: block;
+}
+
+.auth-gate__panel h1{
+  font-size: 1.5rem;
+  line-height: 1.2;
+  margin-bottom: 0.8rem;
+}
+
+.auth-gate__panel p{
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-bottom: var(--space-md);
+}
+
+.auth-gate__panel .btn{ width: 100%; justify-content: center; }
+
+.auth-gate__note{
+  font-size: 0.76rem !important;
+  color: var(--text-faint) !important;
+  margin-top: var(--space-sm) !important;
+  margin-bottom: 0 !important;
+}
+
+.auth-gate #auth-gate-denied strong{ color: var(--text-primary); word-break: break-all; }
+
+/* ============================================================
+   User chip (postranní menu)
+   ============================================================ */
+
+.user-chip{
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.7rem 0.8rem;
+  background: var(--bg-elevated-2);
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-sm);
+  font-size: 0.82rem;
+}
+
+#user-chip{
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  color: var(--text-muted);
+}
+
+.user-chip__logout{
+  font-size: 0.72rem;
+  color: var(--flame);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* ============================================================
    Layout — appka
    ============================================================ */
 
