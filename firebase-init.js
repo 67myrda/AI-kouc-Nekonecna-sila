@@ -41,7 +41,8 @@ const provider = new GoogleAuthProvider();
 const loginView = document.getElementById("auth-gate-login");
 const deniedView = document.getElementById("auth-gate-denied");
 const deniedEmailEl = document.getElementById("denied-email");
-const userChipEl = document.getElementById("user-chip");
+const userChipEls = document.querySelectorAll(".user-chip-value");
+const logoutBtns = document.querySelectorAll(".logout-btn");
 
 function lock() {
   document.body.classList.add("is-locked");
@@ -72,9 +73,8 @@ onAuthStateChanged(auth, (user) => {
     return;
   }
 
-  if (userChipEl) {
-    userChipEl.textContent = user.displayName || user.email;
-  }
+  const label = user.displayName || user.email;
+  userChipEls.forEach((el) => { el.textContent = label; });
   unlock();
 });
 
@@ -89,6 +89,6 @@ document.getElementById("logout-btn").addEventListener("click", () => {
   signOut(auth);
 });
 
-document.getElementById("logout-btn-sidenav")?.addEventListener("click", () => {
-  signOut(auth);
+logoutBtns.forEach((btn) => {
+  btn.addEventListener("click", () => signOut(auth));
 });

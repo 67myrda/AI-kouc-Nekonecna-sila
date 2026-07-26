@@ -699,6 +699,13 @@ body.is-locked .bottomnav{ display: none; }
 
 .more-sheet__list{ display: flex; flex-direction: column; gap: 2px; }
 
+.more-sheet__footer{
+  margin-top: var(--space-md);
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--border);
+  justify-content: center;
+}
+
 @media (min-width: 768px){
   .more-sheet{ display: none !important; }
 }

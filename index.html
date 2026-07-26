@@ -87,8 +87,8 @@
     </ul>
 
     <div class="user-chip">
-      <span id="user-chip">—</span>
-      <button class="user-chip__logout" id="logout-btn-sidenav" title="Odhlásit se">Odhlásit</button>
+      <span class="user-chip-value">—</span>
+      <button class="user-chip__logout logout-btn" title="Odhlásit se">Odhlásit</button>
     </div>
 
     <div class="sidenav__footer">
@@ -306,11 +306,22 @@
 <div class="more-sheet" id="more-sheet">
   <div class="more-sheet__panel">
     <div class="more-sheet__grip"></div>
+
+    <div class="user-chip">
+      <span class="user-chip-value">—</span>
+      <button class="user-chip__logout logout-btn" title="Odhlásit se">Odhlásit</button>
+    </div>
+
     <div class="more-sheet__list">
       <button class="navlink" data-view="hodnoty"><svg><use href="#icon-values"/></svg>Hodnoty</button>
       <button class="navlink" data-view="techniky"><svg><use href="#icon-concepts"/></svg>Techniky</button>
       <button class="navlink" data-view="denik"><svg><use href="#icon-capsule"/></svg>Deník &amp; schránka</button>
       <button class="navlink" data-view="pripominky"><svg><use href="#icon-bell"/></svg>Připomínky</button>
+    </div>
+
+    <div class="sidenav__footer more-sheet__footer">
+      <svg class="spark-icon" viewBox="0 0 100 100"><use href="#icon-spark"/></svg>
+      AI coach © ⁶⁷〽️ &amp; Claude✦ 2026
     </div>
   </div>
 </div>
