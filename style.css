@@ -468,6 +468,22 @@ body.is-locked .bottomnav{ display: none; }
 
 .concept-card--locked{ opacity: 0.55; }
 
+.concept-card__footer{
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 0.6rem;
+  margin-top: var(--space-sm);
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.btn--sm{
+  padding: 0.45rem 0.75rem;
+  font-size: 0.78rem;
+}
+
+.btn--sm:disabled{ opacity: 0.5; cursor: default; }
+
 .module-note{
   border: 1px dashed var(--border-strong);
   border-radius: var(--radius-md);

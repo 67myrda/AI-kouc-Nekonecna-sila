@@ -38,6 +38,8 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
+export { app, auth };
+
 const loginView = document.getElementById("auth-gate-login");
 const deniedView = document.getElementById("auth-gate-denied");
 const deniedEmailEl = document.getElementById("denied-email");

@@ -131,7 +131,7 @@
 
       <div class="streak-strip">
         <div class="streak-chip"><div class="streak-chip__num">0</div><div class="streak-chip__label">dní v řadě</div></div>
-        <div class="streak-chip"><div class="streak-chip__num">0/5</div><div class="streak-chip__label">konceptů splněno</div></div>
+        <div class="streak-chip"><div class="streak-chip__num" id="stat-concepts">0/5</div><div class="streak-chip__label">konceptů splněno</div></div>
         <div class="streak-chip"><div class="streak-chip__num">0</div><div class="streak-chip__label">cílů aktivních</div></div>
       </div>
 
@@ -212,30 +212,50 @@
       </div>
 
       <div class="concept-grid">
-        <div class="concept-card">
+        <div class="concept-card" data-concept="modelovani">
           <span class="concept-card__num">KONCEPT 01 — MODELOVÁNÍ</span>
           <h3>Modelování</h3>
           <p>Pokud někdo dosáhl mimořádného výsledku, jeho cesta je opakovatelná — přesvědčení, fyziologie, mentální syntaxe.</p>
+          <div class="concept-card__footer">
+            <span class="badge concept-status">Nesplněno</span>
+            <button class="btn btn--ghost btn--sm concept-toggle">Označit jako splněné</button>
+          </div>
         </div>
-        <div class="concept-card">
+        <div class="concept-card" data-concept="stav">
           <span class="concept-card__num">KONCEPT 02 — STAV</span>
           <h3>Stav</h3>
           <p>Tvé výsledky vychází ze stavu, ve kterém jednáš. Stav lze vědomě měnit fyziologií i zaměřením pozornosti.</p>
+          <div class="concept-card__footer">
+            <span class="badge concept-status">Nesplněno</span>
+            <button class="btn btn--ghost btn--sm concept-toggle">Označit jako splněné</button>
+          </div>
         </div>
-        <div class="concept-card">
+        <div class="concept-card" data-concept="presvedceni">
           <span class="concept-card__num">KONCEPT 03 — PŘESVĚDČENÍ</span>
           <h3>Přesvědčení</h3>
           <p>Sedm posilujících přesvědčení, která fungují jako filtr reality a nasměrovávají chování.</p>
+          <div class="concept-card__footer">
+            <span class="badge concept-status">Nesplněno</span>
+            <button class="btn btn--ghost btn--sm concept-toggle">Označit jako splněné</button>
+          </div>
         </div>
-        <div class="concept-card">
+        <div class="concept-card" data-concept="kotveni">
           <span class="concept-card__num">KONCEPT 04 — KOTVENÍ</span>
           <h3>Kotvení</h3>
           <p>Smyslový spouštěč, který kdykoli vyvolá zdrojný emocionální stav.</p>
+          <div class="concept-card__footer">
+            <span class="badge concept-status">Nesplněno</span>
+            <button class="btn btn--ghost btn--sm concept-toggle">Označit jako splněné</button>
+          </div>
         </div>
-        <div class="concept-card">
+        <div class="concept-card" data-concept="komunikace">
           <span class="concept-card__num">KONCEPT 05 — KOMUNIKACE</span>
           <h3>Komunikace</h3>
           <p>Raport, zrcadlení a agreement frame jako základ ovlivňování bez manipulace.</p>
+          <div class="concept-card__footer">
+            <span class="badge concept-status">Nesplněno</span>
+            <button class="btn btn--ghost btn--sm concept-toggle">Označit jako splněné</button>
+          </div>
         </div>
         <div class="concept-card concept-card--locked">
           <span class="concept-card__num">MODUL — ROZŠÍŘENÍ</span>
@@ -244,7 +264,7 @@
         </div>
       </div>
 
-      <div class="module-note">Cvičení a ukládání poznámek ke konceptům přijde ve Fázi 2–3, spolu s ukládáním do databáze.</div>
+      <div class="module-note">Poznámky ke cvičením a AI kouč do konceptů přijdou ve Fázi 3. Zatím jde jen o označení „hotovo/nehotovo", ale to se už ukládá napříč zařízeními.</div>
     </section>
 
     <!-- ---------- DENÍK / ČASOVÁ SCHRÁNKA ---------- -->
@@ -328,5 +348,6 @@
 
 <script src="app.js"></script>
 <script type="module" src="firebase-init.js?v=3"></script>
+<script type="module" src="firestore-data.js?v=1"></script>
 </body>
 </html>
