@@ -8,6 +8,12 @@ import { app, auth } from "./firebase-init.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 import {
   getFirestore,
+  collection,
+  addDoc,
+  getDocs,
+  query,
+  orderBy,
+  limit,
   doc,
   updateDoc,
   serverTimestamp,
@@ -31,6 +37,52 @@ let history = [];
 let transcriptLog = [];
 let activeGoal = null; // { id, title, description }
 let sending = false;
+let historyLoaded = false;
+
+// appka posílá Claude API celou historii při každé zprávě — u dlouhodobě
+// vedeného deníku by to časem zbytečně prodražovalo každý dotaz, tak na
+// vstup omezíme jen posledních pár výměn (appka si v chatu pamatuje/zobrazuje
+// úplně vše, jen do API se posílá jen nedávný kontext)
+const MAX_API_HISTORY = 20;
+function historyForApi() {
+  return history.length > MAX_API_HISTORY ? history.slice(-MAX_API_HISTORY) : history;
+}
+
+// uložení jedné zprávy obecného (necíleného) rozhovoru do Firestore —
+// rozhovory vedené v rámci konkrétního cíle se ukládají zvlášť, tlačítkem
+async function persistGeneralMessage(role, text) {
+  const user = auth.currentUser;
+  if (!user) return;
+  try {
+    await addDoc(collection(db, "users", user.uid, "coachMessages"), {
+      role,
+      text,
+      createdAt: serverTimestamp(),
+    });
+  } catch (err) {
+    console.error("Uložení zprávy do historie rozhovoru selhalo:", err);
+  }
+}
+
+// načtení uložené historie obecného rozhovoru při otevření appky
+async function loadGeneralHistory(user) {
+  try {
+    const q = query(
+      collection(db, "users", user.uid, "coachMessages"),
+      orderBy("createdAt", "asc"),
+      limit(200)
+    );
+    const snap = await getDocs(q);
+    snap.forEach((docSnap) => {
+      const m = docSnap.data();
+      if (!m || !m.text) return;
+      addBubble(m.role === "user" ? "user" : "coach", m.text);
+      history.push({ role: m.role === "user" ? "user" : "assistant", content: m.text });
+    });
+  } catch (err) {
+    console.error("Načtení historie rozhovoru selhalo:", err);
+  }
+}
 
 function addBubble(role, text) {
   const bubble = document.createElement("div");
@@ -79,6 +131,7 @@ async function callCoach(apiText, showUserBubble) {
     addBubble("user", apiText);
     transcriptLog.push({ who: "Ty", text: apiText });
     scrollInputIntoView();
+    if (!activeGoal) persistGeneralMessage("user", apiText);
   }
   history.push({ role: "user", content: apiText });
 
@@ -89,7 +142,7 @@ async function callCoach(apiText, showUserBubble) {
     const res = await fetch(WORKER_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ messages: history }),
+      body: JSON.stringify({ messages: historyForApi() }),
     });
 
     const data = await res.json();
@@ -107,6 +160,7 @@ async function callCoach(apiText, showUserBubble) {
     history.push({ role: "assistant", content: replyText });
     transcriptLog.push({ who: "Kouč", text: replyText });
     if (showUserBubble) scrollInputIntoView();
+    if (!activeGoal) persistGeneralMessage("coach", replyText);
   } catch (err) {
     typingBubble.remove();
     console.error(err);
@@ -132,8 +186,11 @@ inputEl.addEventListener("keydown", (e) => {
   if (e.key === "Enter") sendMessage();
 });
 
-onAuthStateChanged(auth, (user) => {
+onAuthStateChanged(auth, async (user) => {
   if (!user) return;
+  if (historyLoaded) return;
+  historyLoaded = true;
+  await loadGeneralHistory(user);
   if (messagesEl.childElementCount === 0) {
     addBubble("coach", "Ahoj! Na čem chceš dneska pracovat — na stavu, na přesvědčení, na kotvení, nebo si probereme cíl?");
   }
