@@ -64,6 +64,7 @@
   function frame(t) {
     var W = canvas.width, H = canvas.height;
     ctx.clearRect(0, 0, W, H);
+    ctx.globalCompositeOperation = "lighter"; // světla se sčítají = viditelnější, zářivější mřížka
 
     for (var row = 0; row < ROWS; row++) {
       // rozsah mírně přesahuje 0..1 nahoře i dole, ať vlnění nikdy neodhalí
@@ -81,8 +82,8 @@
         var y = v * H + wave * H * 0.04;
 
         var crest = Math.max(0, wave); // 0..~1
-        var size = (0.8 + crest * 1.6) * dpr * (0.75 + 0.6 * u);
-        var alpha = 0.34 + crest * 0.55;
+        var size = (1.0 + crest * 1.7) * dpr * (0.8 + 0.6 * u);
+        var alpha = 0.4 + crest * 0.5;
 
         var col_ = mixColor(u * 0.75 + crest * 0.4);
 

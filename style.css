@@ -500,6 +500,17 @@ select.text-input{ appearance: none; }
 
 .hero-banner__content h1{ font-size: 2rem; margin: 0.3rem 0 0.7rem; }
 
+.hero-banner__motto{
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.02rem;
+  color: var(--flame);
+  margin: 0 0 var(--space-md);
+  line-height: 1.4;
+}
+
+.hero-banner__motto span{ color: var(--gold); font-style: normal; margin: 0 0.3em; }
+
 @media (max-width: 640px){
   .hero-banner{ min-height: 340px; }
   .hero-banner__content{ max-width: 100%; }
