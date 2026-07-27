@@ -42,13 +42,24 @@
 
   function resize() {
     var rect = wrap.getBoundingClientRect();
+    if (rect.width < 2 || rect.height < 2) return; // ještě není rozložené, počkáme na další měření
     cssW = rect.width;
     cssH = rect.height;
+    canvas.style.width = cssW + "px";
+    canvas.style.height = cssH + "px";
     canvas.width = Math.max(1, Math.round(cssW * dpr));
     canvas.height = Math.max(1, Math.round(cssH * dpr));
   }
+
   resize();
-  window.addEventListener("resize", resize);
+  // ResizeObserver spolehlivě zachytí i pozdější/prvotní rozložení
+  // (řeší situaci, kdy se canvas změřil dřív, než měl banner finální rozměr)
+  if (window.ResizeObserver) {
+    new ResizeObserver(resize).observe(wrap);
+  } else {
+    window.addEventListener("resize", resize);
+    setTimeout(resize, 200); // záložní opakované měření bez ResizeObserveru
+  }
 
   function frame(t) {
     var W = canvas.width, H = canvas.height;
@@ -68,8 +79,8 @@
         var y = v * H + wave * H * 0.06;
 
         var crest = Math.max(0, wave); // 0..~1
-        var size = (0.5 + crest * 1.3) * dpr * (0.55 + 0.9 * u);
-        var alpha = 0.08 + crest * 0.55 + u * 0.12;
+        var size = (0.9 + crest * 1.8) * dpr * (0.6 + 1.0 * u);
+        var alpha = 0.16 + crest * 0.68 + u * 0.14;
 
         var col_ = mixColor(u * 0.75 + crest * 0.4);
 
