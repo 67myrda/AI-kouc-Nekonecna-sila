@@ -201,14 +201,23 @@ onAuthStateChanged(auth, async (user) => {
 /* ==================== SPUŠTĚNÍ DNEŠNÍ LEKCE (koncept z "Dnes") ==================== */
 
 window.addEventListener("concept-coach-start", (e) => {
-  const concept = e.detail; // { title, desc }
+  const concept = e.detail; // { slug, title, desc }
   if (window.showView) window.showView("kouc");
 
   const primingText =
     `Chci si dnes projít koncept „${concept.title}“ z knihy Nekonečná síla. ${concept.desc} ` +
     `Uveď mě krátce do tématu a proveď mě jedním praktickým cvičením na to, krok po kroku — polož mi vždy jen jednu otázku a počkej na odpověď, ať to nejen čtu, ale zkusím naživo.`;
 
-  markTodayActivity("kouc");
+  // strukturovaný signál pro "Dnes" — jaký koncept se naposledy reálně
+  // začal probírat s koučem. Explicitní zápis při startu lekce, ne odhad
+  // z textu chatu — vždy jednoznačné, ověřitelné, odolné vůči změnám textů.
+  markTodayActivity("kouc", {
+    lastConceptDiscussed: {
+      slug: concept.slug || null,
+      title: concept.title || null,
+      at: serverTimestamp(),
+    },
+  });
   callCoach(primingText, false);
 });
 

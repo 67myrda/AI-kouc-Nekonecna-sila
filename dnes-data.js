@@ -54,12 +54,25 @@ function setStepsRing(done) {
   }
 }
 
-/* ---- doporučený koncept dne (první nesplněný) ---- */
+/* ---- doporučený koncept dne ----
+   Priorita 1: koncept, který se naposledy reálně začal probírat s koučem
+   (lastConceptDiscussed, uloženo v ai-coach.js při startu lekce) — pokud
+   ještě není označen jako splněný. Tohle plní slib appky "navrhuju podle
+   toho, co jsme naposledy probírali".
+   Priorita 2 (fallback, vždy funguje): první nesplněný koncept v pořadí —
+   platí pro nové uživatele i pro stav, kdy poslední probíraný koncept už
+   je hotový. */
 let currentConcept = null;
+let currentConceptIsContinuation = false;
 
-function renderSuggestedConcept(concepts) {
-  const next = CONCEPTS.find((c) => !concepts?.[c.slug]);
+function renderSuggestedConcept(concepts, lastConceptDiscussed) {
+  const lastSlug = lastConceptDiscussed?.slug || null;
+  const continuation =
+    lastSlug && !concepts?.[lastSlug] ? CONCEPTS.find((c) => c.slug === lastSlug) : null;
+
+  const next = continuation || CONCEPTS.find((c) => !concepts?.[c.slug]);
   currentConcept = next || null;
+  currentConceptIsContinuation = !!continuation;
 
   if (!next) {
     if (badgeEl) badgeEl.textContent = "Všechny koncepty splněné";
@@ -69,16 +82,22 @@ function renderSuggestedConcept(concepts) {
     return;
   }
 
-  if (badgeEl) badgeEl.textContent = "Koncept " + next.num + " — " + next.title;
+  if (badgeEl) {
+    badgeEl.textContent = currentConceptIsContinuation
+      ? "Pokračujeme — Koncept " + next.num + " — " + next.title
+      : "Koncept " + next.num + " — " + next.title;
+  }
   if (titleEl) titleEl.textContent = next.title;
   if (descEl) descEl.textContent = next.desc;
-  if (startBtn) startBtn.textContent = "Spustit dnešní lekci";
+  if (startBtn) {
+    startBtn.textContent = currentConceptIsContinuation ? "Pokračovat v dnešní lekci" : "Spustit dnešní lekci";
+  }
 }
 
 startBtn?.addEventListener("click", () => {
   if (currentConcept) {
     window.dispatchEvent(new CustomEvent("concept-coach-start", {
-      detail: { title: currentConcept.title, desc: currentConcept.desc },
+      detail: { slug: currentConcept.slug, title: currentConcept.title, desc: currentConcept.desc },
     }));
   } else if (window.showView) {
     window.showView("kouc");
@@ -119,7 +138,7 @@ onAuthStateChanged(auth, (user) => {
       const doneCount = progress ? ["koncept", "kouc", "cile"].filter((k) => progress[k]).length : 0;
       setStepsRing(doneCount);
 
-      renderSuggestedConcept(data.concepts || {});
+      renderSuggestedConcept(data.concepts || {}, data.lastConceptDiscussed || null);
     },
     (err) => console.error("Dnes: sync chyba:", err)
   );

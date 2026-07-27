@@ -28,8 +28,14 @@ function dateKey(offsetDays) {
  * Zaznamená, že uživatel dnes udělal aktivitu dané kategorie
  * ("koncept" | "kouc" | "cile") — aktualizuje dnešní kroky i řadu dní.
  * Bezpečné volat opakovaně (jeden den se počítá jen jednou na kategorii).
+ *
+ * @param {string} category - "koncept" | "kouc" | "cile"
+ * @param {object} [extraFields] - volitelná další pole k uložení na users/{uid}
+ *   v témže zápisu (merge). Používá se pro strukturované signály návaznosti
+ *   (např. lastConceptDiscussed) — vždy explicitní data, nikdy parsování
+ *   textu chatu, ať je zdroj pravdy jednoznačný a ověřitelný.
  */
-export async function markTodayActivity(category) {
+export async function markTodayActivity(category, extraFields) {
   const user = auth.currentUser;
   if (!user) return;
 
@@ -53,11 +59,12 @@ export async function markTodayActivity(category) {
       lastActiveDate = today;
     }
 
-    await setDoc(
-      ref,
-      { dailyProgress: progress, streak, lastActiveDate, updatedAt: serverTimestamp() },
-      { merge: true }
-    );
+    const payload = { dailyProgress: progress, streak, lastActiveDate, updatedAt: serverTimestamp() };
+    if (extraFields && typeof extraFields === "object") {
+      Object.assign(payload, extraFields);
+    }
+
+    await setDoc(ref, payload, { merge: true });
   } catch (err) {
     console.error("Sledování denního pokroku selhalo:", err);
   }
