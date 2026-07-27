@@ -507,9 +507,25 @@ select.text-input{ appearance: none; }
   color: var(--flame);
   margin: 0 0 var(--space-md);
   line-height: 1.4;
+  text-wrap: balance;
 }
 
-.hero-banner__motto span{ color: var(--gold); font-style: normal; margin: 0 0.3em; }
+.hero-banner__motto-label{
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  white-space: nowrap;
+  color: var(--gold);
+  font-style: normal;
+  font-weight: 700;
+  margin-right: 0.4em;
+}
+
+.hero-banner__motto-label .spark-icon{
+  width: 0.85em;
+  height: 0.85em;
+  color: var(--gold);
+}
 
 @media (max-width: 640px){
   .hero-banner{ min-height: 340px; }
