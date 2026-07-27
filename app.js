@@ -59,6 +59,10 @@
   var validViews = Array.prototype.map.call(views, function (v) { return v.dataset.view; });
   showView(validViews.indexOf(initial) !== -1 ? initial : DEFAULT_VIEW);
 
+  // zpřístupnit i jiným modulům (např. ai-coach.js potřebuje přepnout appku
+  // na sekci "kouč", když se spouští vedení cíle přes tlačítko na kartě cíle)
+  window.showView = showView;
+
   // ---- jiskrový kruh na "Dnes" — animace při načtení ----
   var progressRing = document.querySelector(".spark-ring .progress");
   if (progressRing) {

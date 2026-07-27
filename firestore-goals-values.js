@@ -105,7 +105,7 @@ function renderGoals(goals) {
         </div>
         <div class="goal-card__actions">
           ${g.status === "active" ? `<button class="btn btn--ghost btn--sm" data-action="coach">${hasTranscript ? "Pokračovat v rozhovoru" : "Projít 12 kroků s AI koučem"}</button>` : ""}
-          <button class="btn btn--ghost btn--sm" data-action="toggle">${g.status === "active" ? "Splnit" : "Znovu aktivovat"}</button>
+          <button class="btn btn--ghost btn--sm" data-action="toggle">${g.status === "active" ? "Splněno" : "Znovu aktivovat"}</button>
           <button class="btn btn--ghost btn--sm" data-action="delete">Smazat</button>
         </div>
       </div>

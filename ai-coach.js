@@ -50,6 +50,19 @@ function addTypingBubble() {
   return bubble;
 }
 
+// na mobilu klávesnice často schová vstupní pole nebo poslední zprávu —
+// po každé akci ho aktivně dorovnáme do viditelné oblasti
+function scrollInputIntoView() {
+  requestAnimationFrame(() => {
+    inputEl.scrollIntoView({ block: "center", behavior: "smooth" });
+  });
+}
+
+inputEl.addEventListener("focus", () => {
+  // malé zpoždění, ať se stihne doanimovat vysunutí klávesnice
+  setTimeout(scrollInputIntoView, 300);
+});
+
 /**
  * Odešle text Worker proxy a zpracuje odpověď.
  * @param {string} apiText - text, co jde do historie pro Claude API
@@ -65,10 +78,12 @@ async function callCoach(apiText, showUserBubble) {
   if (showUserBubble) {
     addBubble("user", apiText);
     transcriptLog.push({ who: "Ty", text: apiText });
+    scrollInputIntoView();
   }
   history.push({ role: "user", content: apiText });
 
   const typingBubble = addTypingBubble();
+  scrollInputIntoView();
 
   try {
     const res = await fetch(WORKER_URL, {
@@ -91,6 +106,7 @@ async function callCoach(apiText, showUserBubble) {
     addBubble("coach", replyText);
     history.push({ role: "assistant", content: replyText });
     transcriptLog.push({ who: "Kouč", text: replyText });
+    scrollInputIntoView();
   } catch (err) {
     typingBubble.remove();
     console.error(err);
@@ -172,9 +188,8 @@ goalSaveBtn.addEventListener("click", async () => {
 window.addEventListener("goal-coach-start", (e) => {
   const goal = e.detail;
 
-  // přepnout na obrazovku AI kouče (využívá existující navigaci z app.js)
-  const coachNavBtn = document.querySelector('[data-view="kouc"]');
-  if (coachNavBtn) coachNavBtn.click();
+  // přepnout na obrazovku AI kouče (spolehlivé přímé volání, ne simulace kliku)
+  if (window.showView) window.showView("kouc");
 
   // nová relace vedení = čistý chat, ať se to nemíchá s obecným rozhovorem
   messagesEl.innerHTML = "";
