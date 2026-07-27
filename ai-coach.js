@@ -185,11 +185,32 @@ goalSaveBtn.addEventListener("click", async () => {
   }
 });
 
+// vlastní přepnutí na sekci "kouč" — nezávislé na app.js, ať appka
+// spolehlivě přejde na chat i kdyby se cross-modulová vazba nějak zadrhla
+function switchToCoachView() {
+  const targetSection = document.getElementById("view-kouc");
+  if (!targetSection) return;
+  document.querySelectorAll(".view").forEach((v) => {
+    v.classList.toggle("is-active", v.dataset.view === "kouc");
+  });
+  document.querySelectorAll("[data-view]").forEach((el) => {
+    if (el.dataset.view === "kouc") {
+      el.setAttribute("aria-current", "page");
+    } else {
+      el.removeAttribute("aria-current");
+    }
+  });
+  const moreSheet = document.getElementById("more-sheet");
+  if (moreSheet) moreSheet.classList.remove("is-open");
+  window.location.hash = "kouc";
+  window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
+}
+
 window.addEventListener("goal-coach-start", (e) => {
   const goal = e.detail;
 
-  // přepnout na obrazovku AI kouče (spolehlivé přímé volání, ne simulace kliku)
-  if (window.showView) window.showView("kouc");
+  // přepnout na obrazovku AI kouče (vlastní implementace, viz výše)
+  switchToCoachView();
 
   // nová relace vedení = čistý chat, ať se to nemíchá s obecným rozhovorem
   messagesEl.innerHTML = "";
