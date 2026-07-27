@@ -18,6 +18,7 @@ import {
   updateDoc,
   serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+import { markTodayActivity } from "./progress.js";
 
 const WORKER_URL = "https://ai-kouc-proxy.67myrda.workers.dev/";
 const db = getFirestore(app);
@@ -161,6 +162,7 @@ async function callCoach(apiText, showUserBubble) {
     transcriptLog.push({ who: "Kouč", text: replyText });
     if (showUserBubble) scrollInputIntoView();
     if (!activeGoal) persistGeneralMessage("coach", replyText);
+    if (showUserBubble) markTodayActivity("kouc");
   } catch (err) {
     typingBubble.remove();
     console.error(err);
@@ -194,6 +196,20 @@ onAuthStateChanged(auth, async (user) => {
   if (messagesEl.childElementCount === 0) {
     addBubble("coach", "Ahoj! Na čem chceš dneska pracovat — na stavu, na přesvědčení, na kotvení, nebo si probereme cíl?");
   }
+});
+
+/* ==================== SPUŠTĚNÍ DNEŠNÍ LEKCE (koncept z "Dnes") ==================== */
+
+window.addEventListener("concept-coach-start", (e) => {
+  const concept = e.detail; // { title, desc }
+  if (window.showView) window.showView("kouc");
+
+  const primingText =
+    `Chci si dnes projít koncept „${concept.title}“ z knihy Nekonečná síla. ${concept.desc} ` +
+    `Uveď mě krátce do tématu a proveď mě jedním praktickým cvičením na to, krok po kroku — polož mi vždy jen jednu otázku a počkej na odpověď, ať to nejen čtu, ale zkusím naživo.`;
+
+  markTodayActivity("kouc");
+  callCoach(primingText, false);
 });
 
 /* ==================== VEDENÍ 12 KROKŮ K CÍLI ==================== */

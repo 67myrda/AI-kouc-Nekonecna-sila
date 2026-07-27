@@ -13,6 +13,7 @@ import {
   serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+import { markTodayActivity } from "./progress.js";
 
 const db = getFirestore(app);
 
@@ -67,6 +68,7 @@ async function toggleConcept(slug) {
   );
   // Neaktualizujeme UI ručně tady — onSnapshot níže to udělá samo,
   // jakmile se zápis potvrdí (funguje to i napříč zařízeními).
+  if (next[slug]) markTodayActivity("koncept");
 }
 
 conceptCards.forEach((card) => {

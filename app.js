@@ -66,17 +66,7 @@
   // na sekci "kouč", když se spouští vedení cíle přes tlačítko na kartě cíle)
   window.showView = showView;
 
-  // ---- jiskrový kruh na "Dnes" — animace při načtení ----
-  var progressRing = document.querySelector(".spark-ring .progress");
-  if (progressRing) {
-    var circumference = 2 * Math.PI * 55; // r=55
-    progressRing.style.strokeDasharray = circumference;
-    // 1/3 splněno v Fázi 1 = zástupná ukázka
-    var fraction = 1 / 3;
-    requestAnimationFrame(function () {
-      progressRing.style.strokeDashoffset = circumference * (1 - fraction);
-    });
-  }
+  // jiskrový kruh na "Dnes" — reálná data teď dodává dnes-data.js
 
   // ---- přepínače v Připomínkách — jen vizuální stav, bez ukládání (Fáze 1) ----
   document.querySelectorAll(".toggle").forEach(function (t) {

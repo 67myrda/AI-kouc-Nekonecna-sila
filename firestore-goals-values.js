@@ -17,6 +17,7 @@ import {
   orderBy,
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+import { markTodayActivity } from "./progress.js";
 
 const db = getFirestore(app);
 
@@ -76,6 +77,7 @@ goalSaveBtn.addEventListener("click", async () => {
       createdAt: serverTimestamp(),
     });
     goalCancelBtn.click();
+    markTodayActivity("cile");
   } catch (err) {
     console.error(err);
     alert("Uložení se nezdařilo. Zkus to prosím znovu.");
@@ -135,6 +137,7 @@ async function toggleGoal(id, currentStatus) {
   await updateDoc(doc(db, "users", user.uid, "goals", id), {
     status: currentStatus === "active" ? "completed" : "active",
   });
+  markTodayActivity("cile");
 }
 
 async function removeGoal(id, title) {

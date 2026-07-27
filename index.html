@@ -108,7 +108,7 @@
         <div class="hero-banner__scrim" aria-hidden="true"></div>
         <div class="hero-banner__content">
           <p class="hero-banner__motto">Motto <span>•</span> <em>Solo attraverso i sogni si può trovare la propria strada</em></p>
-          <span class="eyebrow">Neděle, 26. července</span>
+          <span class="eyebrow" id="today-date">Neděle, 26. července</span>
           <h1>Dobrý den</h1>
           <p class="view__lede">Tady začíná každá lekce. Téma dneška navrhuju já podle toho, co jsme naposledy probírali — nebo si klidně vyber vlastní.</p>
         </div>
@@ -121,29 +121,24 @@
             <circle class="progress" cx="60" cy="60" r="55"/>
           </svg>
           <div class="spark-ring__label">
-            <span class="spark-ring__count">1/3<small>dnešní kroky</small></span>
+            <span class="spark-ring__count"><span id="stat-today-steps">0/3</span><small>dnešní kroky</small></span>
           </div>
         </div>
         <div class="today-hero__text">
-          <span class="badge">Koncept 02 — Stav</span>
-          <h2 class="today-hero__theme">Vědomá změna stavu před náročnou chvílí</h2>
-          <p class="card__body">Krátké cvičení na fyziologii a zaměření pozornosti — přesně to, co appka po tobě chce, než se pustíme do dnešního rozhovoru.</p>
+          <span class="badge" id="today-concept-badge">Koncept — Stav</span>
+          <h2 class="today-hero__theme" id="today-concept-title">Vědomá změna stavu před náročnou chvílí</h2>
+          <p class="card__body" id="today-concept-desc">Krátké cvičení na fyziologii a zaměření pozornosti.</p>
           <div class="today-hero__actions">
-            <button class="btn btn--primary">Spustit dnešní lekci</button>
-            <button class="btn btn--ghost">Vybrat jiné téma</button>
+            <button class="btn btn--primary" id="today-start-btn">Spustit dnešní lekci</button>
+            <button class="btn btn--ghost" id="today-other-btn">Vybrat jiné téma</button>
           </div>
         </div>
       </div>
 
       <div class="streak-strip">
-        <div class="streak-chip"><div class="streak-chip__num">0</div><div class="streak-chip__label">dní v řadě</div></div>
+        <div class="streak-chip"><div class="streak-chip__num" id="stat-streak">0</div><div class="streak-chip__label">dní v řadě</div></div>
         <div class="streak-chip"><div class="streak-chip__num" id="stat-concepts">0/5</div><div class="streak-chip__label">konceptů splněno</div></div>
         <div class="streak-chip"><div class="streak-chip__num" id="stat-goals">0</div><div class="streak-chip__label">cílů aktivních</div></div>
-      </div>
-
-      <div class="card">
-        <div class="card__title">Fáze 1 — tohle je zatím kostra appky</div>
-        <p class="card__body">Čísla a data na téhle obrazovce jsou zástupná. Ve Fázi 2 appka začne ukládat tvůj skutečný pokrok do databáze a Fáze 3 přidá živého AI kouče do chatu vedle.</p>
       </div>
     </section>
 
@@ -398,11 +393,13 @@
   </div>
 </div>
 
-<script src="app.js?v=2"></script>
+<script src="app.js?v=3"></script>
 <script src="hero-wave.js?v=1"></script>
 <script type="module" src="firebase-init.js?v=6"></script>
-<script type="module" src="firestore-data.js?v=1"></script>
-<script type="module" src="firestore-goals-values.js?v=3"></script>
-<script type="module" src="ai-coach.js?v=3"></script>
+<script type="module" src="progress.js?v=1"></script>
+<script type="module" src="firestore-data.js?v=2"></script>
+<script type="module" src="firestore-goals-values.js?v=4"></script>
+<script type="module" src="ai-coach.js?v=4"></script>
+<script type="module" src="dnes-data.js?v=1"></script>
 </body>
 </html>
