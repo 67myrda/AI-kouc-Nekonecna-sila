@@ -459,6 +459,188 @@ select.text-input{ appearance: none; }
 }
 
 /* ============================================================
+   Hledání cíle — dvě dlaždice, dělítko, mapa cesty
+   ============================================================ */
+
+.discovery-tiles{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+@media (max-width: 640px){
+  .discovery-tiles{ grid-template-columns: 1fr; }
+}
+
+.discovery-tile{ display: flex; flex-direction: column; }
+
+.discovery-tile__num{ font-size: 1.3rem; margin-bottom: 0.3rem; }
+
+.discovery-tile__btn{ margin-top: auto; align-self: flex-start; }
+
+.section-divider{
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: var(--space-md) 0;
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.section-divider::before,
+.section-divider::after{
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.steps-diagram{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0;
+  position: relative;
+}
+
+.steps-diagram__node{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 16.6%;
+  min-width: 92px;
+  padding: 0.3rem;
+  position: relative;
+}
+
+.steps-diagram__node::after{
+  content: "";
+  position: absolute;
+  top: 16px;
+  left: calc(50% + 20px);
+  width: calc(100% - 40px);
+  height: 2px;
+  background: var(--gradient-signature);
+  opacity: 0.4;
+}
+
+.steps-diagram__node:nth-child(6n)::after{ display: none; }
+
+.steps-diagram__num{
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gradient-signature);
+  color: #14121f;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.85rem;
+  margin-bottom: 0.4rem;
+  position: relative;
+  z-index: 1;
+}
+
+.steps-diagram__node--final .steps-diagram__num{ background: var(--gold); }
+
+.steps-diagram__label{
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  line-height: 1.25;
+}
+
+/* ============================================================
+   Krok-po-kroku vedení v chatu — progress dots + sbalitelné kroky
+   ============================================================ */
+
+.step-progress{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.6rem 0.9rem;
+  border-radius: var(--radius-sm);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  margin-bottom: 0.75rem;
+}
+
+.step-progress__label{
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.step-progress__dots{ display: flex; gap: 0.3rem; flex-wrap: wrap; }
+
+.step-progress__dot{
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--border-strong);
+}
+
+.step-progress__dot.is-done{ background: var(--gold); }
+.step-progress__dot.is-active{
+  background: var(--flame);
+  box-shadow: 0 0 0 3px var(--flame-dim);
+}
+
+.step-group{
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin: 0.6rem 0;
+  overflow: hidden;
+  background: var(--bg-elevated);
+}
+
+.step-group summary{
+  padding: 0.55rem 0.8rem;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  list-style: none;
+}
+
+.step-group summary::-webkit-details-marker{ display: none; }
+
+.step-group summary::before{ content: "▸ "; color: var(--flame); }
+.step-group[open] summary::before{ content: "▾ "; }
+
+.step-group .chat-bubble{ margin: 0.4rem 0.8rem; }
+.step-group .chat-bubble:last-child{ margin-bottom: 0.7rem; }
+
+.goal-summary-card{
+  border: 1px solid var(--gold-dim);
+  background: linear-gradient(160deg, var(--bg-elevated-2), var(--bg-elevated));
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  margin: 0.8rem 0;
+}
+
+.goal-summary-card__eyebrow{
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold);
+  display: block;
+  margin-bottom: 0.4rem;
+}
+
+.goal-summary-card__title{ font-size: 1.15rem; margin-bottom: 0.4rem; }
+
+.goal-summary-card__desc{ color: var(--text-muted); font-size: 0.92rem; margin-bottom: 0.9rem; }
+
+/* ============================================================
    Dnes — hero banner: generovaná vlnící se struktura na pozadí,
    text přímo na ní (canvas animace, ne statický obrázek)
    ============================================================ */

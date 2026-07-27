@@ -80,7 +80,7 @@
     <ul class="sidenav__list" id="nav-list">
       <li><button class="navlink" data-view="dnes"><svg><use href="#icon-today"/></svg>Dnes</button></li>
       <li><button class="navlink" data-view="kouc"><svg><use href="#icon-coach"/></svg>AI kouč</button></li>
-      <li><button class="navlink" data-view="cile"><svg><use href="#icon-goals"/></svg>Cíle</button></li>
+      <li><button class="navlink" data-view="cile"><svg><use href="#icon-goals"/></svg>Hledání cíle</button></li>
       <li><button class="navlink" data-view="hodnoty"><svg><use href="#icon-values"/></svg>Hodnoty</button></li>
       <li><button class="navlink" data-view="techniky"><svg><use href="#icon-concepts"/></svg>Techniky</button></li>
       <li><button class="navlink" data-view="denik"><svg><use href="#icon-capsule"/></svg>Deník &amp; schránka</button></li>
@@ -161,6 +161,11 @@
         </div>
       </div>
 
+      <div class="step-progress" id="step-progress" style="display:none">
+        <div class="step-progress__label" id="step-progress-label">Krok 1 / 12</div>
+        <div class="step-progress__dots" id="step-progress-dots"></div>
+      </div>
+
       <div class="chat-shell">
         <div id="chat-messages"></div>
         <div class="chat-input-row">
@@ -170,15 +175,32 @@
       </div>
     </section>
 
-    <!-- ---------- CÍLE ---------- -->
+    <!-- ---------- HLEDÁNÍ CÍLE ---------- -->
     <section class="view" id="view-cile" data-view="cile">
       <div class="view__header">
-        <span class="eyebrow">Cíle · Outcome Thinking</span>
-        <h1>Tvoje cíle</h1>
-        <p class="view__lede">12krokový postup podle Nekonečné síly — vedený mnou v rozhovoru, ne jen formulář k vyplnění o samotě.</p>
+        <span class="eyebrow">Hledání cíle · Outcome Thinking</span>
+        <h1>Hledání cíle</h1>
+        <p class="view__lede">Metoda 12 kroků z Nekonečné síly na to, aby sis přesně ujasnil/a, po čem toužíš — a jak se tam dostat. Živě vedeno mnou v rozhovoru, ne formulář k vyplnění o samotě.</p>
       </div>
 
-      <button class="btn btn--primary" id="goal-new-btn">+ Nový cíl</button>
+      <div class="discovery-tiles">
+        <div class="discovery-tile card">
+          <div class="discovery-tile__num">1️⃣</div>
+          <div class="card__title">Cíl, po kterém toužím</div>
+          <p class="card__body">Víš zhruba, co chceš, ale ne jak se tam dostat. Provedu tě správným postupem k cíli — krok za krokem, podle metody z knihy.</p>
+          <button class="btn btn--primary btn--sm discovery-tile__btn" id="discovery-start-mode1">Začít rozhovor s koučem</button>
+        </div>
+        <div class="discovery-tile card">
+          <div class="discovery-tile__num">2️⃣</div>
+          <div class="card__title">Cíl, který hledám</div>
+          <p class="card__body">Ještě přesně nevíš, co chceš. Provedu tě k poznání, po čem doopravdy toužíš, a pak i k cestě, jak toho dosáhnout.</p>
+          <button class="btn btn--primary btn--sm discovery-tile__btn" id="discovery-start-mode2">Začít rozhovor s koučem</button>
+        </div>
+      </div>
+
+      <div class="section-divider"><span>nebo, pokud cíl už přesně znáš</span></div>
+
+      <button class="btn btn--ghost" id="goal-new-btn">+ Přidat cíl přímo</button>
 
       <div class="card form-card" id="goal-form-card" style="display:none">
         <div class="card__title">Nový cíl</div>
@@ -202,13 +224,21 @@
       </div>
 
       <div class="card" style="margin-top:1.5rem">
-        <div class="card__title">Náhled 12 kroků</div>
-        <div class="steps">
-          <div class="step-row"><span class="step-row__num"></span><span class="step-row__text">Popiš výsledek pozitivně — co chceš, ne čemu se chceš vyhnout</span></div>
-          <div class="step-row"><span class="step-row__num"></span><span class="step-row__text">Zkonkretizuj — kdy, kde, s kým, jak to poznáš</span></div>
-          <div class="step-row"><span class="step-row__num"></span><span class="step-row__text">Ověř zdroje, které už máš k dispozici</span></div>
-          <div class="step-row"><span class="step-row__num"></span><span class="step-row__text">Popiš, co ti dosud stálo v cestě</span></div>
-          <div class="step-row"><span class="step-row__num"></span><span class="step-row__text">… zbylých 8 kroků appka provede s AI koučem ve Fázi 3</span></div>
+        <div class="card__title">Orientační mapa cesty</div>
+        <p class="card__body" style="margin-bottom:0.9rem">Takhle zhruba vypadá cesta 12 kroky. Přesné otázky pokládá kouč živě podle tebe a tvého cíle — tohle je jen ilustrace, ne doslovný scénář.</p>
+        <div class="steps-diagram">
+          <div class="steps-diagram__node"><span class="steps-diagram__num">1</span><span class="steps-diagram__label">Co přesně chceš</span></div>
+          <div class="steps-diagram__node"><span class="steps-diagram__num">2</span><span class="steps-diagram__label">Jak to poznáš</span></div>
+          <div class="steps-diagram__node"><span class="steps-diagram__num">3</span><span class="steps-diagram__label">Kde, kdy, s kým</span></div>
+          <div class="steps-diagram__node"><span class="steps-diagram__num">4</span><span class="steps-diagram__label">Proč na tom záleží</span></div>
+          <div class="steps-diagram__node"><span class="steps-diagram__num">5</span><span class="steps-diagram__label">Jaké zdroje máš</span></div>
+          <div class="steps-diagram__node"><span class="steps-diagram__num">6</span><span class="steps-diagram__label">Co stálo v cestě</span></div>
+          <div class="steps-diagram__node"><span class="steps-diagram__num">7</span><span class="steps-diagram__label">Cena úspěchu</span></div>
+          <div class="steps-diagram__node"><span class="steps-diagram__num">8</span><span class="steps-diagram__label">Koho se to dotkne</span></div>
+          <div class="steps-diagram__node"><span class="steps-diagram__num">9</span><span class="steps-diagram__label">První krok</span></div>
+          <div class="steps-diagram__node"><span class="steps-diagram__num">10</span><span class="steps-diagram__label">Ověření cesty</span></div>
+          <div class="steps-diagram__node"><span class="steps-diagram__num">11</span><span class="steps-diagram__label">Kotva / připomínka</span></div>
+          <div class="steps-diagram__node steps-diagram__node--final"><span class="steps-diagram__num">12</span><span class="steps-diagram__label">Shrnutí a závazek</span></div>
         </div>
       </div>
     </section>
@@ -369,7 +399,7 @@
 <nav class="bottomnav" aria-label="Hlavní navigace (mobil)">
   <button class="bottomnav__item" data-view="dnes"><svg><use href="#icon-today"/></svg>Dnes</button>
   <button class="bottomnav__item" data-view="kouc"><svg><use href="#icon-coach"/></svg>Kouč</button>
-  <button class="bottomnav__item" data-view="cile"><svg><use href="#icon-goals"/></svg>Cíle</button>
+  <button class="bottomnav__item" data-view="cile"><svg><use href="#icon-goals"/></svg>Hledání cíle</button>
   <button class="bottomnav__item" id="more-trigger"><svg><use href="#icon-more"/></svg>Více</button>
 </nav>
 
@@ -401,8 +431,8 @@
 <script type="module" src="firebase-init.js?v=6"></script>
 <script type="module" src="progress.js?v=2"></script>
 <script type="module" src="firestore-data.js?v=2"></script>
-<script type="module" src="firestore-goals-values.js?v=4"></script>
-<script type="module" src="ai-coach.js?v=5"></script>
+<script type="module" src="firestore-goals-values.js?v=5"></script>
+<script type="module" src="ai-coach.js?v=6"></script>
 <script type="module" src="dnes-data.js?v=2"></script>
 </body>
 </html>

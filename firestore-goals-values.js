@@ -46,6 +46,22 @@ const goalsListEl = document.getElementById("goals-list");
 const goalsEmptyEl = document.getElementById("goals-empty");
 const statGoalsEl = document.getElementById("stat-goals");
 
+/* -------- Hledání cíle: dvě dlaždice (objevovací rozhovor s koučem) -------- */
+
+const discoveryMode1Btn = document.getElementById("discovery-start-mode1");
+const discoveryMode2Btn = document.getElementById("discovery-start-mode2");
+
+if (discoveryMode1Btn) {
+  discoveryMode1Btn.addEventListener("click", () => {
+    window.dispatchEvent(new CustomEvent("cile-objevovani-start", { detail: { mode: 1 } }));
+  });
+}
+if (discoveryMode2Btn) {
+  discoveryMode2Btn.addEventListener("click", () => {
+    window.dispatchEvent(new CustomEvent("cile-objevovani-start", { detail: { mode: 2 } }));
+  });
+}
+
 goalNewBtn.addEventListener("click", () => {
   goalFormCard.style.display = "";
   goalNewBtn.style.display = "none";
