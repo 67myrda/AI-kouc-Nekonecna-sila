@@ -204,15 +204,21 @@ function switchToCoachView() {
   if (moreSheet) moreSheet.classList.remove("is-open");
   window.location.hash = "kouc";
   window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
-
-  // DOČASNÁ DIAGNOSTIKA (smažu po odladění) — ukáže v titulku karty/záložky,
-  // jestli se sekci opravdu podařilo přepnout na is-active
-  setTimeout(() => {
-    const isActive = targetSection.classList.contains("is-active");
-    const computedDisplay = getComputedStyle(targetSection).display;
-    document.title = "DEBUG aktivní=" + isActive + " display=" + computedDisplay;
-  }, 50);
 }
+
+// DOČASNÁ DIAGNOSTIKA (smažu po odladění) — sleduje ÚPLNĚ KAŽDOU změnu
+// třídy is-active na sekci Kouč, ať zjistíme, jestli se nastaví a hned
+// nezvrátí něčím jiným. Log se ukazuje v titulku karty/záložky prohlížeče.
+(function setupDebugObserver() {
+  const kouc = document.getElementById("view-kouc");
+  if (!kouc) return;
+  const log = [];
+  const mo = new MutationObserver(() => {
+    log.push(kouc.classList.contains("is-active") ? "1" : "0");
+    document.title = "DBG:" + log.join("");
+  });
+  mo.observe(kouc, { attributes: true, attributeFilter: ["class"] });
+})();
 
 window.addEventListener("goal-coach-start", (e) => {
   const goal = e.detail;
