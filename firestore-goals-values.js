@@ -92,6 +92,7 @@ function renderGoals(goals) {
   goalsEmptyEl.style.display = goals.length === 0 ? "" : "none";
 
   goals.forEach((g) => {
+    const hasTranscript = Boolean(g.outcomeThinkingTranscript);
     const card = document.createElement("div");
     card.className = "card goal-card" + (g.status === "completed" ? " goal-card--completed" : "");
     card.innerHTML = `
@@ -100,8 +101,10 @@ function renderGoals(goals) {
           <div class="card__title">${escapeHtml(g.title)}</div>
           ${g.description ? `<div class="card__body">${escapeHtml(g.description)}</div>` : ""}
           ${g.targetDate ? `<div class="goal-card__date">Cíl: ${escapeHtml(g.targetDate)}</div>` : ""}
+          ${hasTranscript ? `<div class="goal-card__coach-note">✓ Rozhovor s koučem uložen</div>` : ""}
         </div>
         <div class="goal-card__actions">
+          ${g.status === "active" ? `<button class="btn btn--ghost btn--sm" data-action="coach">${hasTranscript ? "Pokračovat v rozhovoru" : "Projít 12 kroků s AI koučem"}</button>` : ""}
           <button class="btn btn--ghost btn--sm" data-action="toggle">${g.status === "active" ? "Splnit" : "Znovu aktivovat"}</button>
           <button class="btn btn--ghost btn--sm" data-action="delete">Smazat</button>
         </div>
@@ -109,6 +112,19 @@ function renderGoals(goals) {
     `;
     card.querySelector('[data-action="toggle"]').addEventListener("click", () => toggleGoal(g.id, g.status));
     card.querySelector('[data-action="delete"]').addEventListener("click", () => removeGoal(g.id, g.title));
+    const coachBtn = card.querySelector('[data-action="coach"]');
+    if (coachBtn) {
+      coachBtn.addEventListener("click", () => {
+        window.dispatchEvent(new CustomEvent("goal-coach-start", {
+          detail: {
+            id: g.id,
+            title: g.title,
+            description: g.description || "",
+            transcript: g.outcomeThinkingTranscript || "",
+          },
+        }));
+      });
+    }
     goalsListEl.appendChild(card);
   });
 }

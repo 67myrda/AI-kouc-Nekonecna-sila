@@ -219,12 +219,19 @@ select.text-input{ appearance: none; }
   flex-wrap: wrap;
 }
 
-.goal-card__actions{ display: flex; gap: 0.4rem; flex-shrink: 0; }
+.goal-card__actions{ display: flex; gap: 0.4rem; flex-wrap: wrap; justify-content: flex-end; }
 
 .goal-card__date{
   font-family: var(--font-mono);
   font-size: 0.72rem;
   color: var(--text-faint);
+  margin-top: 0.4rem;
+}
+
+.goal-card__coach-note{
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--gold);
   margin-top: 0.4rem;
 }
 
@@ -653,6 +660,24 @@ select.text-input{ appearance: none; }
 /* ============================================================
    AI Kouč — placeholder chat
    ============================================================ */
+
+.goal-coach-banner{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  background: var(--gold-dim);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm) var(--space-md);
+  margin-bottom: var(--space-sm);
+  font-size: 0.85rem;
+}
+
+.goal-coach-banner__text strong{ color: var(--gold); }
+
+.goal-coach-banner__actions{ display: flex; gap: 0.4rem; flex-wrap: wrap; }
 
 .chat-shell{
   background: var(--bg-elevated);

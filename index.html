@@ -150,6 +150,14 @@
         <p class="view__lede">Konverzace vychází z principů knihy Nekonečná síla. Nejsem náhrada odborné psychologické pomoci.</p>
       </div>
 
+      <div class="goal-coach-banner" id="goal-coach-banner" style="display:none">
+        <div class="goal-coach-banner__text">🎯 Vedení cíle: <strong id="goal-coach-banner-title"></strong></div>
+        <div class="goal-coach-banner__actions">
+          <button class="btn btn--ghost btn--sm" id="goal-coach-save-btn">Uložit rozhovor k cíli</button>
+          <button class="btn btn--ghost btn--sm" id="goal-coach-exit-btn">Ukončit vedení</button>
+        </div>
+      </div>
+
       <div class="chat-shell">
         <div id="chat-messages"></div>
         <div class="chat-input-row">
@@ -388,7 +396,7 @@
 <script src="app.js"></script>
 <script type="module" src="firebase-init.js?v=6"></script>
 <script type="module" src="firestore-data.js?v=1"></script>
-<script type="module" src="firestore-goals-values.js?v=1"></script>
-<script type="module" src="ai-coach.js?v=1"></script>
+<script type="module" src="firestore-goals-values.js?v=2"></script>
+<script type="module" src="ai-coach.js?v=2"></script>
 </body>
 </html>
