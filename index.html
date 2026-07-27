@@ -185,13 +185,13 @@
 
       <div class="discovery-tiles">
         <div class="discovery-tile card">
-          <div class="discovery-tile__num">1️⃣</div>
+          <div class="discovery-tile__num">I</div>
           <div class="card__title">Cíl, po kterém toužím</div>
           <p class="card__body">Víš zhruba, co chceš, ale ne jak se tam dostat. Provedu tě správným postupem k cíli — krok za krokem, podle metody z knihy.</p>
           <button class="btn btn--primary btn--sm discovery-tile__btn" id="discovery-start-mode1">Začít rozhovor s koučem</button>
         </div>
         <div class="discovery-tile card">
-          <div class="discovery-tile__num">2️⃣</div>
+          <div class="discovery-tile__num">II</div>
           <div class="card__title">Cíl, který hledám</div>
           <p class="card__body">Ještě přesně nevíš, co chceš. Provedu tě k poznání, po čem doopravdy toužíš, a pak i k cestě, jak toho dosáhnout.</p>
           <button class="btn btn--primary btn--sm discovery-tile__btn" id="discovery-start-mode2">Začít rozhovor s koučem</button>
@@ -226,19 +226,60 @@
       <div class="card" style="margin-top:1.5rem">
         <div class="card__title">Orientační mapa cesty</div>
         <p class="card__body" style="margin-bottom:0.9rem">Takhle zhruba vypadá cesta 12 kroky. Přesné otázky pokládá kouč živě podle tebe a tvého cíle — tohle je jen ilustrace, ne doslovný scénář.</p>
-        <div class="steps-diagram">
-          <div class="steps-diagram__node"><span class="steps-diagram__num">1</span><span class="steps-diagram__label">Co přesně chceš</span></div>
-          <div class="steps-diagram__node"><span class="steps-diagram__num">2</span><span class="steps-diagram__label">Jak to poznáš</span></div>
-          <div class="steps-diagram__node"><span class="steps-diagram__num">3</span><span class="steps-diagram__label">Kde, kdy, s kým</span></div>
-          <div class="steps-diagram__node"><span class="steps-diagram__num">4</span><span class="steps-diagram__label">Proč na tom záleží</span></div>
-          <div class="steps-diagram__node"><span class="steps-diagram__num">5</span><span class="steps-diagram__label">Jaké zdroje máš</span></div>
-          <div class="steps-diagram__node"><span class="steps-diagram__num">6</span><span class="steps-diagram__label">Co stálo v cestě</span></div>
-          <div class="steps-diagram__node"><span class="steps-diagram__num">7</span><span class="steps-diagram__label">Cena úspěchu</span></div>
-          <div class="steps-diagram__node"><span class="steps-diagram__num">8</span><span class="steps-diagram__label">Koho se to dotkne</span></div>
-          <div class="steps-diagram__node"><span class="steps-diagram__num">9</span><span class="steps-diagram__label">První krok</span></div>
-          <div class="steps-diagram__node"><span class="steps-diagram__num">10</span><span class="steps-diagram__label">Ověření cesty</span></div>
-          <div class="steps-diagram__node"><span class="steps-diagram__num">11</span><span class="steps-diagram__label">Kotva / připomínka</span></div>
-          <div class="steps-diagram__node steps-diagram__node--final"><span class="steps-diagram__num">12</span><span class="steps-diagram__label">Shrnutí a závazek</span></div>
+        <div class="steps-diagram-wrap">
+          <div class="steps-diagram">
+            <div class="steps-diagram__node"><span class="steps-diagram__num">1</span><span class="steps-diagram__label">Co přesně chceš</span></div>
+            <div class="steps-diagram__node"><span class="steps-diagram__num">2</span><span class="steps-diagram__label">Jak to poznáš</span></div>
+            <div class="steps-diagram__node"><span class="steps-diagram__num">3</span><span class="steps-diagram__label">Kde, kdy, s kým</span></div>
+            <div class="steps-diagram__node"><span class="steps-diagram__num">4</span><span class="steps-diagram__label">Proč na tom záleží</span></div>
+            <div class="steps-diagram__node"><span class="steps-diagram__num">5</span><span class="steps-diagram__label">Jaké zdroje máš</span></div>
+            <div class="steps-diagram__node"><span class="steps-diagram__num">6</span><span class="steps-diagram__label">Co stálo v cestě</span></div>
+            <div class="steps-diagram__node"><span class="steps-diagram__num">7</span><span class="steps-diagram__label">Cena úspěchu</span></div>
+            <div class="steps-diagram__node"><span class="steps-diagram__num">8</span><span class="steps-diagram__label">Koho se to dotkne</span></div>
+            <div class="steps-diagram__node"><span class="steps-diagram__num">9</span><span class="steps-diagram__label">První krok</span></div>
+            <div class="steps-diagram__node"><span class="steps-diagram__num">10</span><span class="steps-diagram__label">Ověření cesty</span></div>
+            <div class="steps-diagram__node"><span class="steps-diagram__num">11</span><span class="steps-diagram__label">Kotva / připomínka</span></div>
+            <div class="steps-diagram__node steps-diagram__node--final"><span class="steps-diagram__num">12</span><span class="steps-diagram__label">Shrnutí a závazek</span></div>
+          </div>
+
+          <div class="steps-diagram-radial">
+            <svg class="steps-diagram-radial__lines" viewBox="0 0 100 100" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="spokeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#ff6a4d"/>
+                  <stop offset="100%" stop-color="#7c6bf0"/>
+                </linearGradient>
+              </defs>
+              <line x1="50" y1="50" x2="50" y2="14"/>
+              <line x1="50" y1="50" x2="68" y2="18.82"/>
+              <line x1="50" y1="50" x2="81.18" y2="32"/>
+              <line x1="50" y1="50" x2="86" y2="50"/>
+              <line x1="50" y1="50" x2="81.18" y2="68"/>
+              <line x1="50" y1="50" x2="68" y2="81.18"/>
+              <line x1="50" y1="50" x2="50" y2="86"/>
+              <line x1="50" y1="50" x2="32" y2="81.18"/>
+              <line x1="50" y1="50" x2="18.82" y2="68"/>
+              <line x1="50" y1="50" x2="14" y2="50"/>
+              <line x1="50" y1="50" x2="18.82" y2="32"/>
+              <line x1="50" y1="50" x2="32" y2="18.82"/>
+            </svg>
+            <div class="steps-diagram-radial__center">
+              <span class="steps-diagram-radial__center-num">12</span>
+              <span class="steps-diagram-radial__center-label">kroků cesty</span>
+            </div>
+            <div class="steps-diagram-radial__node" style="left:50%;top:14%"><span class="steps-diagram-radial__num">1</span><span class="steps-diagram-radial__label">Co přesně chceš</span></div>
+            <div class="steps-diagram-radial__node" style="left:68%;top:18.82%"><span class="steps-diagram-radial__num">2</span><span class="steps-diagram-radial__label">Jak to poznáš</span></div>
+            <div class="steps-diagram-radial__node" style="left:81.18%;top:32%"><span class="steps-diagram-radial__num">3</span><span class="steps-diagram-radial__label">Kde, kdy, s kým</span></div>
+            <div class="steps-diagram-radial__node" style="left:86%;top:50%"><span class="steps-diagram-radial__num">4</span><span class="steps-diagram-radial__label">Proč na tom záleží</span></div>
+            <div class="steps-diagram-radial__node" style="left:81.18%;top:68%"><span class="steps-diagram-radial__num">5</span><span class="steps-diagram-radial__label">Jaké zdroje máš</span></div>
+            <div class="steps-diagram-radial__node" style="left:68%;top:81.18%"><span class="steps-diagram-radial__num">6</span><span class="steps-diagram-radial__label">Co stálo v cestě</span></div>
+            <div class="steps-diagram-radial__node" style="left:50%;top:86%"><span class="steps-diagram-radial__num">7</span><span class="steps-diagram-radial__label">Cena úspěchu</span></div>
+            <div class="steps-diagram-radial__node" style="left:32%;top:81.18%"><span class="steps-diagram-radial__num">8</span><span class="steps-diagram-radial__label">Koho se to dotkne</span></div>
+            <div class="steps-diagram-radial__node" style="left:18.82%;top:68%"><span class="steps-diagram-radial__num">9</span><span class="steps-diagram-radial__label">První krok</span></div>
+            <div class="steps-diagram-radial__node" style="left:14%;top:50%"><span class="steps-diagram-radial__num">10</span><span class="steps-diagram-radial__label">Ověření cesty</span></div>
+            <div class="steps-diagram-radial__node" style="left:18.82%;top:32%"><span class="steps-diagram-radial__num">11</span><span class="steps-diagram-radial__label">Kotva / připomínka</span></div>
+            <div class="steps-diagram-radial__node steps-diagram-radial__node--final" style="left:32%;top:18.82%"><span class="steps-diagram-radial__num">12</span><span class="steps-diagram-radial__label">Shrnutí a závazek</span></div>
+          </div>
         </div>
       </div>
     </section>

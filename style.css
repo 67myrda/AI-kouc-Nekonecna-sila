@@ -475,7 +475,20 @@ select.text-input{ appearance: none; }
 
 .discovery-tile{ display: flex; flex-direction: column; }
 
-.discovery-tile__num{ font-size: 1.3rem; margin-bottom: 0.3rem; }
+.discovery-tile__num{
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gradient-signature);
+  color: #14121f;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
 
 .discovery-tile__btn{ margin-top: auto; align-self: flex-start; }
 
@@ -484,7 +497,7 @@ select.text-input{ appearance: none; }
   align-items: center;
   gap: 0.75rem;
   margin: var(--space-md) 0;
-  color: var(--text-faint);
+  color: var(--flame);
   font-family: var(--font-mono);
   font-size: 0.72rem;
   letter-spacing: 0.06em;
@@ -496,7 +509,7 @@ select.text-input{ appearance: none; }
   content: "";
   flex: 1;
   height: 1px;
-  background: var(--border);
+  background: linear-gradient(90deg, transparent, var(--flame-dim), transparent);
 }
 
 .steps-diagram{
@@ -639,6 +652,120 @@ select.text-input{ appearance: none; }
 .goal-summary-card__title{ font-size: 1.15rem; margin-bottom: 0.4rem; }
 
 .goal-summary-card__desc{ color: var(--text-muted); font-size: 0.92rem; margin-bottom: 0.9rem; }
+
+/* ============================================================
+   Orientační mapa cesty — radiální varianta pro širší obrazovky
+   (na mobilu zůstává jednodušší řádková verze výše)
+   ============================================================ */
+
+.steps-diagram-radial{ display: none; }
+
+@media (min-width: 900px){
+  .steps-diagram{ display: none; }
+
+  .steps-diagram-radial{
+    display: block;
+    position: relative;
+    width: 100%;
+    max-width: 560px;
+    aspect-ratio: 1 / 1;
+    margin: 1rem auto 0.5rem;
+  }
+
+  .steps-diagram-radial::before{
+    content: "";
+    position: absolute;
+    inset: 8%;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--flame-dim) 0%, var(--violet-dim) 45%, transparent 72%);
+    filter: blur(6px);
+    z-index: 0;
+  }
+
+  .steps-diagram-radial__lines{
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+  }
+
+  .steps-diagram-radial__lines line{
+    stroke: url(#spokeGrad);
+    stroke-width: 0.4;
+    stroke-opacity: 0.55;
+  }
+
+  .steps-diagram-radial__center{
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 26%;
+    height: 26%;
+    border-radius: 50%;
+    background: var(--gradient-signature);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    z-index: 2;
+    box-shadow: 0 0 30px var(--flame-dim);
+  }
+
+  .steps-diagram-radial__center-num{
+    font-family: var(--font-display);
+    font-size: 1.9rem;
+    font-weight: 700;
+    color: #14121f;
+    line-height: 1;
+  }
+
+  .steps-diagram-radial__center-label{
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    color: rgba(20,18,31,0.75);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-top: 0.15rem;
+  }
+
+  .steps-diagram-radial__node{
+    position: absolute;
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.3rem 0.65rem 0.3rem 0.3rem;
+    background: var(--bg-elevated-2);
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    white-space: nowrap;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    z-index: 2;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.35);
+  }
+
+  .steps-diagram-radial__num{
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--gradient-signature);
+    color: #14121f;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 0.7rem;
+  }
+
+  .steps-diagram-radial__node--final .steps-diagram-radial__num{ background: var(--gold); }
+  .steps-diagram-radial__node--final{ border-color: var(--gold-dim); color: var(--text-primary); }
+}
 
 /* ============================================================
    Dnes — hero banner: generovaná vlnící se struktura na pozadí,
