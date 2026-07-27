@@ -375,7 +375,7 @@ select.text-input{ appearance: none; }
 @media (min-width: 768px){
   .sidenav{ display: flex; }
   .main{ padding: var(--space-xl) var(--space-xl); }
-  .bottomnav{ display: none; }
+  .bottomnav{ display: none !important; }
 }
 
 .view{ display: none; max-width: 880px; margin: 0 auto; }
@@ -456,6 +456,61 @@ select.text-input{ appearance: none; }
   background: var(--bg-elevated-2);
   border: 1px solid var(--border-strong);
   color: var(--text-primary);
+}
+
+/* ============================================================
+   Dnes — generovaná neuronová/nekonečno grafika v hlavičce
+   ============================================================ */
+
+.neuro-banner{
+  position: relative;
+  height: 168px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-bottom: var(--space-lg);
+  background: radial-gradient(ellipse at 30% 30%, rgba(124,107,240,0.16), transparent 60%),
+              radial-gradient(ellipse at 75% 70%, rgba(255,106,77,0.14), transparent 55%),
+              var(--bg-elevated);
+  border: 1px solid var(--border);
+}
+
+.neuro-banner svg{
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.neuro-banner::after{
+  /* jemné prolnutí spodního okraje, ať grafika nepůsobí jako ostrá krabice */
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 55%, var(--bg-elevated) 100%);
+  pointer-events: none;
+}
+
+.neuro-node-pulse{
+  animation: neuro-pulse 3.2s ease-in-out infinite;
+  transform-origin: center;
+  transform-box: fill-box;
+}
+
+@keyframes neuro-pulse{
+  0%, 100%{ opacity: 0.35; transform: scale(1); }
+  50%{ opacity: 0.95; transform: scale(1.35); }
+}
+
+.neuro-infinity-flow{
+  animation: neuro-flow 6s linear infinite;
+}
+
+@keyframes neuro-flow{
+  to{ stroke-dashoffset: -240; }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .neuro-node-pulse, .neuro-infinity-flow{ animation: none; }
 }
 
 /* ============================================================
