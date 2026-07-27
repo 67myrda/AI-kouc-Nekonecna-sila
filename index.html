@@ -133,7 +133,7 @@
       <div class="streak-strip">
         <div class="streak-chip"><div class="streak-chip__num">0</div><div class="streak-chip__label">dní v řadě</div></div>
         <div class="streak-chip"><div class="streak-chip__num" id="stat-concepts">0/5</div><div class="streak-chip__label">konceptů splněno</div></div>
-        <div class="streak-chip"><div class="streak-chip__num">0</div><div class="streak-chip__label">cílů aktivních</div></div>
+        <div class="streak-chip"><div class="streak-chip__num" id="stat-goals">0</div><div class="streak-chip__label">cílů aktivních</div></div>
       </div>
 
       <div class="card">
@@ -147,16 +147,14 @@
       <div class="view__header">
         <span class="eyebrow">AI kouč</span>
         <h1>Rozhovor s koučem</h1>
-        <p class="view__lede">Ve Fázi 3 tu poběží skutečná konverzace se mnou, napojená na tvoje cíle a historii. Teď je tu jen ukázka rozvržení.</p>
+        <p class="view__lede">Konverzace vychází z principů knihy Nekonečná síla. Nejsem náhrada odborné psychologické pomoci.</p>
       </div>
 
       <div class="chat-shell">
-        <div class="chat-bubble chat-bubble--coach">Ahoj! Na čem chceš dneska pracovat — na stavu, na přesvědčení, nebo si probereme cíl?</div>
-        <div class="chat-bubble chat-bubble--user">Chci se podívat na to kotvení.</div>
-        <div class="chat-bubble chat-bubble--coach">Výborně. Než začneme, vybav si moment, kdy jsi měl/a naprostou jistotu…</div>
+        <div id="chat-messages"></div>
         <div class="chat-input-row">
-          <input type="text" placeholder="Napiš zprávu (funkční až od Fáze 3)…" disabled>
-          <button class="btn btn--primary" disabled>Odeslat</button>
+          <input type="text" id="chat-input" placeholder="Napiš zprávu…" autocomplete="off">
+          <button class="btn btn--primary" id="chat-send-btn">Odeslat</button>
         </div>
       </div>
     </section>
@@ -169,9 +167,27 @@
         <p class="view__lede">12krokový postup podle Nekonečné síly — vedený mnou v rozhovoru, ne jen formulář k vyplnění o samotě.</p>
       </div>
 
-      <div class="empty-state card">
+      <button class="btn btn--primary" id="goal-new-btn">+ Nový cíl</button>
+
+      <div class="card form-card" id="goal-form-card" style="display:none">
+        <div class="card__title">Nový cíl</div>
+        <label class="field-label" for="goal-title-input">Název cíle</label>
+        <input type="text" id="goal-title-input" class="text-input" placeholder="např. Najít vyváženou práci, kterou miluji">
+        <label class="field-label" for="goal-desc-input">Krátký popis (volitelné)</label>
+        <textarea id="goal-desc-input" class="text-input" rows="2"></textarea>
+        <label class="field-label" for="goal-date-input">Cílové datum (volitelné)</label>
+        <input type="date" id="goal-date-input" class="text-input">
+        <div class="form-actions">
+          <button class="btn btn--primary" id="goal-save-btn">Vytvořit cíl</button>
+          <button class="btn btn--ghost" id="goal-cancel-btn">Zrušit</button>
+        </div>
+      </div>
+
+      <div id="goals-list"></div>
+
+      <div class="empty-state card" id="goals-empty">
         <h3>Zatím žádný aktivní cíl</h3>
-        <p>Než řekneš „jak“, pojďme si nejdřív ujasnit „co“ vlastně chceš. Tohle přijde na řadu ve Fázi 2 — teď se podívej, jak bude 12 kroků vypadat:</p>
+        <p>Než řekneš „jak“, pojďme si nejdřív ujasnit „co“ vlastně chceš.</p>
       </div>
 
       <div class="card" style="margin-top:1.5rem">
@@ -181,7 +197,7 @@
           <div class="step-row"><span class="step-row__num"></span><span class="step-row__text">Zkonkretizuj — kdy, kde, s kým, jak to poznáš</span></div>
           <div class="step-row"><span class="step-row__num"></span><span class="step-row__text">Ověř zdroje, které už máš k dispozici</span></div>
           <div class="step-row"><span class="step-row__num"></span><span class="step-row__text">Popiš, co ti dosud stálo v cestě</span></div>
-          <div class="step-row"><span class="step-row__num"></span><span class="step-row__text">… zbylých 8 kroků doplníme ve Fázi 2</span></div>
+          <div class="step-row"><span class="step-row__num"></span><span class="step-row__text">… zbylých 8 kroků appka provede s AI koučem ve Fázi 3</span></div>
         </div>
       </div>
     </section>
@@ -194,14 +210,36 @@
         <p class="view__lede">Bez vědomé hierarchie hodnot vznikají vnitřní konflikty — tak to popisuje i kniha. Rozděleno podle oblastí života.</p>
       </div>
 
-      <div class="value-areas">
-        <div class="value-area"><div class="value-area__count">0</div><div class="value-area__label">Práce / Kariéra</div></div>
-        <div class="value-area"><div class="value-area__count">0</div><div class="value-area__label">Vztahy / Rodina</div></div>
-        <div class="value-area"><div class="value-area__count">0</div><div class="value-area__label">Zdraví / Tělo</div></div>
-        <div class="value-area"><div class="value-area__count">0</div><div class="value-area__label">Osobní růst</div></div>
-        <div class="value-area"><div class="value-area__count">0</div><div class="value-area__label">Finance</div></div>
-        <div class="value-area"><div class="value-area__count">0</div><div class="value-area__label">Volný čas</div></div>
+      <div class="card form-card">
+        <div class="card__title">Přidat hodnotu</div>
+        <label class="field-label" for="value-area-input">Oblast</label>
+        <select id="value-area-input" class="text-input">
+          <option value="prace">Práce / Kariéra</option>
+          <option value="vztahy">Vztahy / Rodina</option>
+          <option value="zdravi">Zdraví / Tělo</option>
+          <option value="rust">Osobní růst</option>
+          <option value="finance">Finance</option>
+          <option value="volnycas">Volný čas</option>
+        </select>
+        <label class="field-label" for="value-name-input">Název hodnoty</label>
+        <input type="text" id="value-name-input" class="text-input" placeholder="např. Svoboda, Tvořivost, Klid...">
+        <label class="field-label" for="value-desc-input">Krátký popis (volitelné)</label>
+        <textarea id="value-desc-input" class="text-input" rows="2"></textarea>
+        <div class="form-actions">
+          <button class="btn btn--primary" id="value-save-btn">+ Přidat</button>
+        </div>
       </div>
+
+      <div class="value-areas" id="value-areas-grid">
+        <div class="value-area" data-area="prace"><div class="value-area__count">0</div><div class="value-area__label">Práce / Kariéra</div></div>
+        <div class="value-area" data-area="vztahy"><div class="value-area__count">0</div><div class="value-area__label">Vztahy / Rodina</div></div>
+        <div class="value-area" data-area="zdravi"><div class="value-area__count">0</div><div class="value-area__label">Zdraví / Tělo</div></div>
+        <div class="value-area" data-area="rust"><div class="value-area__count">0</div><div class="value-area__label">Osobní růst</div></div>
+        <div class="value-area" data-area="finance"><div class="value-area__count">0</div><div class="value-area__label">Finance</div></div>
+        <div class="value-area" data-area="volnycas"><div class="value-area__count">0</div><div class="value-area__label">Volný čas</div></div>
+      </div>
+
+      <div id="values-by-area"></div>
     </section>
 
     <!-- ---------- TECHNIKY ---------- -->
@@ -350,5 +388,7 @@
 <script src="app.js"></script>
 <script type="module" src="firebase-init.js?v=6"></script>
 <script type="module" src="firestore-data.js?v=1"></script>
+<script type="module" src="firestore-goals-values.js?v=1"></script>
+<script type="module" src="ai-coach.js?v=1"></script>
 </body>
 </html>

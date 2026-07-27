@@ -176,8 +176,89 @@ body.is-locked .bottomnav{ display: none; }
 }
 
 /* ============================================================
-   Layout — appka
+   Formuláře (cíle, hodnoty)
    ============================================================ */
+
+.form-card{ margin-bottom: var(--space-md); }
+
+.field-label{
+  display: block;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin: 0.8rem 0 0.35rem;
+}
+
+.field-label:first-of-type{ margin-top: 0.4rem; }
+
+.text-input{
+  width: 100%;
+  background: var(--bg-elevated-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 0.65rem 0.8rem;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 0.92rem;
+}
+
+.text-input:focus{ outline: none; border-color: var(--flame); }
+
+textarea.text-input{ resize: vertical; }
+
+select.text-input{ appearance: none; }
+
+.form-actions{
+  display: flex; gap: 0.6rem;
+  margin-top: var(--space-sm);
+}
+
+.goal-card{ margin-bottom: var(--space-sm); }
+
+.goal-card__head{
+  display: flex; justify-content: space-between; align-items: flex-start; gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.goal-card__actions{ display: flex; gap: 0.4rem; flex-shrink: 0; }
+
+.goal-card__date{
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-faint);
+  margin-top: 0.4rem;
+}
+
+.goal-card--completed{ opacity: 0.6; }
+
+.goal-card--completed .card__title{ text-decoration: line-through; }
+
+.value-area{ cursor: default; }
+
+.value-group{
+  margin-top: var(--space-md);
+}
+
+.value-group__title{
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  margin-bottom: 0.6rem;
+}
+
+.value-item{
+  display: flex; justify-content: space-between; align-items: flex-start; gap: 0.6rem;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.value-item:last-child{ border-bottom: none; }
+
+.value-item__name{ font-weight: 700; font-size: 0.92rem; }
+
+.value-item__desc{ color: var(--text-muted); font-size: 0.85rem; margin-top: 0.15rem; }
+
+.value-item__delete{ font-size: 0.76rem; color: var(--text-faint); flex-shrink: 0; }
+
+.value-item__delete:hover{ color: var(--flame); }
 
 .app{
   display: flex;
@@ -619,6 +700,32 @@ body.is-locked .bottomnav{ display: none; }
   font-family: inherit;
 }
 
+#chat-messages{
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.chat-bubble--typing{
+  display: flex; gap: 4px; align-items: center;
+  padding: 0.9rem 1rem;
+}
+
+.chat-bubble--typing span{
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--text-faint);
+  animation: typing-bounce 1s infinite ease-in-out;
+}
+
+.chat-bubble--typing span:nth-child(2){ animation-delay: 0.15s; }
+.chat-bubble--typing span:nth-child(3){ animation-delay: 0.3s; }
+
+@keyframes typing-bounce{
+  0%, 60%, 100%{ transform: translateY(0); opacity: 0.5; }
+  30%{ transform: translateY(-4px); opacity: 1; }
+}
+
+.chat-input-row input:disabled{ opacity: 0.6; }
 .chat-input-row input::placeholder{ color: var(--text-faint); }
 
 /* ============================================================
