@@ -16,7 +16,7 @@
   var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var dpr = Math.min(window.devicePixelRatio || 1, 2);
 
-  var COLS = 52, ROWS = 24;
+  var COLS = 62, ROWS = 34;
 
   // appčiny barvy (viz style.css :root) — plamen → fialová → zlatá
   var COLOR_STOPS = [
@@ -66,7 +66,9 @@
     ctx.clearRect(0, 0, W, H);
 
     for (var row = 0; row < ROWS; row++) {
-      var v = row / (ROWS - 1); // 0 nahoře .. 1 dole
+      // rozsah mírně přesahuje 0..1 nahoře i dole, ať vlnění nikdy neodhalí
+      // prázdný pruh u okraje dlaždice
+      var v = -0.08 + (row / (ROWS - 1)) * 1.16;
       for (var col = 0; col < COLS; col++) {
         var u = col / (COLS - 1); // 0 vlevo .. 1 vpravo
 
@@ -76,11 +78,11 @@
           Math.sin(v * 9 - t * 0.0004) * 0.15;
 
         var x = u * W;
-        var y = v * H + wave * H * 0.06;
+        var y = v * H + wave * H * 0.04;
 
         var crest = Math.max(0, wave); // 0..~1
-        var size = (0.9 + crest * 1.8) * dpr * (0.6 + 1.0 * u);
-        var alpha = 0.16 + crest * 0.68 + u * 0.14;
+        var size = (0.8 + crest * 1.6) * dpr * (0.75 + 0.6 * u);
+        var alpha = 0.34 + crest * 0.55;
 
         var col_ = mixColor(u * 0.75 + crest * 0.4);
 
