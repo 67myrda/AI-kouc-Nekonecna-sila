@@ -459,58 +459,49 @@ select.text-input{ appearance: none; }
 }
 
 /* ============================================================
-   Dnes — generovaná neuronová/nekonečno grafika v hlavičce
+   Dnes — hero banner: generovaná vlnící se struktura na pozadí,
+   text přímo na ní (canvas animace, ne statický obrázek)
    ============================================================ */
 
-.neuro-banner{
+.hero-banner{
   position: relative;
-  height: 168px;
+  min-height: 300px;
   border-radius: var(--radius-lg);
   overflow: hidden;
   margin-bottom: var(--space-lg);
-  background: radial-gradient(ellipse at 30% 30%, rgba(124,107,240,0.16), transparent 60%),
-              radial-gradient(ellipse at 75% 70%, rgba(255,106,77,0.14), transparent 55%),
-              var(--bg-elevated);
+  background: var(--bg-elevated);
+  display: flex;
+  align-items: flex-end;
   border: 1px solid var(--border);
 }
 
-.neuro-banner svg{
+#hero-canvas{
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
+  display: block;
 }
 
-.neuro-banner::after{
-  /* jemné prolnutí spodního okraje, ať grafika nepůsobí jako ostrá krabice */
-  content: "";
+.hero-banner__scrim{
   position: absolute;
   inset: 0;
-  background: linear-gradient(to bottom, transparent 55%, var(--bg-elevated) 100%);
+  background: linear-gradient(100deg, rgba(20,18,31,0.96) 0%, rgba(20,18,31,0.82) 32%, rgba(20,18,31,0.35) 58%, transparent 78%);
   pointer-events: none;
 }
 
-.neuro-node-pulse{
-  animation: neuro-pulse 3.2s ease-in-out infinite;
-  transform-origin: center;
-  transform-box: fill-box;
+.hero-banner__content{
+  position: relative;
+  z-index: 2;
+  padding: var(--space-lg);
+  max-width: 560px;
 }
 
-@keyframes neuro-pulse{
-  0%, 100%{ opacity: 0.35; transform: scale(1); }
-  50%{ opacity: 0.95; transform: scale(1.35); }
-}
+.hero-banner__content h1{ font-size: 2rem; margin: 0.3rem 0 0.7rem; }
 
-.neuro-infinity-flow{
-  animation: neuro-flow 6s linear infinite;
-}
-
-@keyframes neuro-flow{
-  to{ stroke-dashoffset: -240; }
-}
-
-@media (prefers-reduced-motion: reduce){
-  .neuro-node-pulse, .neuro-infinity-flow{ animation: none; }
+@media (max-width: 640px){
+  .hero-banner{ min-height: 340px; }
+  .hero-banner__content{ max-width: 100%; }
 }
 
 /* ============================================================

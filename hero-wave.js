@@ -1,0 +1,88 @@
+/* ============================================================
+   AI kouč – Nekonečná síla
+   hero-wave.js — generovaná vlnící se mřížka bodů (canvas),
+   pozadí hero banneru na "Dnes". Inspirováno referenčním
+   moodboardem (digitální vlnová struktura), barvy appky.
+   ============================================================ */
+
+(function () {
+  "use strict";
+
+  var canvas = document.getElementById("hero-canvas");
+  var wrap = document.getElementById("hero-banner");
+  if (!canvas || !wrap) return;
+
+  var ctx = canvas.getContext("2d");
+  var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+  var COLS = 52, ROWS = 24;
+
+  // appčiny barvy (viz style.css :root) — plamen → fialová → zlatá
+  var COLOR_STOPS = [
+    [255, 106, 77],  // --flame
+    [124, 107, 240], // --violet
+    [255, 201, 74],  // --gold
+  ];
+
+  function mixColor(t) {
+    t = Math.max(0, Math.min(1, t));
+    var seg = t * (COLOR_STOPS.length - 1);
+    var i = Math.min(Math.floor(seg), COLOR_STOPS.length - 2);
+    var f = seg - i;
+    var a = COLOR_STOPS[i], b = COLOR_STOPS[i + 1];
+    return [
+      Math.round(a[0] + (b[0] - a[0]) * f),
+      Math.round(a[1] + (b[1] - a[1]) * f),
+      Math.round(a[2] + (b[2] - a[2]) * f),
+    ];
+  }
+
+  var cssW = 0, cssH = 0;
+
+  function resize() {
+    var rect = wrap.getBoundingClientRect();
+    cssW = rect.width;
+    cssH = rect.height;
+    canvas.width = Math.max(1, Math.round(cssW * dpr));
+    canvas.height = Math.max(1, Math.round(cssH * dpr));
+  }
+  resize();
+  window.addEventListener("resize", resize);
+
+  function frame(t) {
+    var W = canvas.width, H = canvas.height;
+    ctx.clearRect(0, 0, W, H);
+
+    for (var row = 0; row < ROWS; row++) {
+      var v = row / (ROWS - 1); // 0 nahoře .. 1 dole
+      for (var col = 0; col < COLS; col++) {
+        var u = col / (COLS - 1); // 0 vlevo .. 1 vpravo
+
+        var wave =
+          Math.sin(u * 7.5 + v * 2.2 - t * 0.0011) * 0.5 +
+          Math.sin(u * 3.2 - v * 5.5 + t * 0.0007) * 0.35 +
+          Math.sin(v * 9 - t * 0.0004) * 0.15;
+
+        var x = u * W;
+        var y = v * H + wave * H * 0.06;
+
+        var crest = Math.max(0, wave); // 0..~1
+        var size = (0.5 + crest * 1.3) * dpr * (0.55 + 0.9 * u);
+        var alpha = 0.08 + crest * 0.55 + u * 0.12;
+
+        var col_ = mixColor(u * 0.75 + crest * 0.4);
+
+        ctx.beginPath();
+        ctx.fillStyle = "rgba(" + col_[0] + "," + col_[1] + "," + col_[2] + "," + Math.min(1, alpha).toFixed(2) + ")";
+        ctx.arc(x, y, Math.max(0.4, size), 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    if (!reduceMotion) requestAnimationFrame(frame);
+  }
+
+  requestAnimationFrame(frame);
+  if (reduceMotion) frame(0); // jeden statický snímek, žádná animace
+})();
