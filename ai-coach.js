@@ -204,6 +204,14 @@ function switchToCoachView() {
   if (moreSheet) moreSheet.classList.remove("is-open");
   window.location.hash = "kouc";
   window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
+
+  // DOČASNÁ DIAGNOSTIKA (smažu po odladění) — ukáže v titulku karty/záložky,
+  // jestli se sekci opravdu podařilo přepnout na is-active
+  setTimeout(() => {
+    const isActive = targetSection.classList.contains("is-active");
+    const computedDisplay = getComputedStyle(targetSection).display;
+    document.title = "DEBUG aktivní=" + isActive + " display=" + computedDisplay;
+  }, 50);
 }
 
 window.addEventListener("goal-coach-start", (e) => {
