@@ -9,7 +9,10 @@
   var DEFAULT_VIEW = "dnes";
 
   var views = document.querySelectorAll(".view");
-  var allNavButtons = document.querySelectorAll("[data-view]");
+  // POUZE tlačítka navigace — sekce (.view) mají data-view taky (kvůli
+  // zjišťování, která je aktivní), ale click listener na ně nepatří: klik
+  // uvnitř sekce by probublal až na ni a přepnul pohled zpátky na sebe.
+  var allNavButtons = document.querySelectorAll("button[data-view]");
   var moreSheet = document.getElementById("more-sheet");
   var moreTrigger = document.getElementById("more-trigger");
 
