@@ -83,7 +83,7 @@ async function callCoach(apiText, showUserBubble) {
   history.push({ role: "user", content: apiText });
 
   const typingBubble = addTypingBubble();
-  scrollInputIntoView();
+  if (showUserBubble) scrollInputIntoView();
 
   try {
     const res = await fetch(WORKER_URL, {
@@ -106,7 +106,7 @@ async function callCoach(apiText, showUserBubble) {
     addBubble("coach", replyText);
     history.push({ role: "assistant", content: replyText });
     transcriptLog.push({ who: "Kouč", text: replyText });
-    scrollInputIntoView();
+    if (showUserBubble) scrollInputIntoView();
   } catch (err) {
     typingBubble.remove();
     console.error(err);
