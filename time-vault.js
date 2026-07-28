@@ -167,7 +167,7 @@ function renderGrid() {
     }
 
     tile.innerHTML = `
-      <svg class="vault-tile__icon"><use href="#icon-${status === "sealed" ? "lock-closed" : "lock-open"}"/></svg>
+      <svg class="vault-tile__icon"><use href="#icon-${status === "sealed" ? "safe-closed" : "safe-open"}"/></svg>
       <div class="vault-tile__title">${escapeHtml(vault.title)}</div>
       <div class="vault-tile__type">${lockTypeLabel(vault)}</div>
       ${sub}
@@ -283,7 +283,7 @@ function openVaultTile(vault, status) {
       detail = `Odemkne se za ${formatCountdown(target)}.`;
     }
     openModal(`
-      <svg class="vault-modal__lock-icon"><use href="#icon-lock-closed"/></svg>
+      <svg class="vault-modal__lock-icon"><use href="#icon-safe-closed"/></svg>
       <h3>${escapeHtml(vault.title)}</h3>
       <p class="card__body">Ještě je zamčeno. ${detail}</p>
       <button class="btn btn--ghost" id="vault-modal-close-btn">Zavřít</button>
@@ -294,7 +294,7 @@ function openVaultTile(vault, status) {
 
   if (status === "open") {
     openModal(`
-      <svg class="vault-modal__lock-icon"><use href="#icon-lock-open"/></svg>
+      <svg class="vault-modal__lock-icon"><use href="#icon-safe-open"/></svg>
       <h3>${escapeHtml(vault.title)}</h3>
       <p class="card__body" style="white-space:pre-wrap">${escapeHtml(vault.text)}</p>
       <button class="btn btn--ghost" id="vault-modal-close-btn">Zavřít</button>
@@ -305,7 +305,7 @@ function openVaultTile(vault, status) {
 
   // status === "unlockable" — potvrzovací krok, pak odhalení
   openModal(`
-    <svg class="vault-modal__lock-icon vault-modal__lock-icon--ready"><use href="#icon-lock-open"/></svg>
+    <svg class="vault-modal__lock-icon vault-modal__lock-icon--ready"><use href="#icon-safe-open"/></svg>
     <h3>${escapeHtml(vault.title)}</h3>
     <p class="card__body">Tenhle trezor je připravený k otevření. Opravdu chceš nahlédnout?</p>
     <div class="form-actions">
@@ -322,7 +322,7 @@ async function revealVault(vault) {
 
   if (vault.lockType === "duration") {
     openModal(`
-      <svg class="vault-modal__lock-icon vault-modal__lock-icon--ready"><use href="#icon-lock-open"/></svg>
+      <svg class="vault-modal__lock-icon vault-modal__lock-icon--ready"><use href="#icon-safe-open"/></svg>
       <h3>${escapeHtml(vault.title)}</h3>
       <p class="card__body" style="white-space:pre-wrap">${escapeHtml(vault.text)}</p>
       <p class="card__body">Co dál s tímhle trezorem?</p>
@@ -350,7 +350,7 @@ async function revealVault(vault) {
 
   if (vault.lockType === "days") {
     openModal(`
-      <svg class="vault-modal__lock-icon vault-modal__lock-icon--ready"><use href="#icon-lock-open"/></svg>
+      <svg class="vault-modal__lock-icon vault-modal__lock-icon--ready"><use href="#icon-safe-open"/></svg>
       <h3>${escapeHtml(vault.title)}</h3>
       <p class="card__body" style="white-space:pre-wrap">${escapeHtml(vault.text)}</p>
       <p class="card__body">Trezor se po zavření znovu zapečetí na dalších ${vault.targetDays || DAYS_TARGET} dní s koučem.</p>
@@ -371,7 +371,7 @@ async function revealVault(vault) {
 
   if (vault.lockType === "yearly") {
     openModal(`
-      <svg class="vault-modal__lock-icon vault-modal__lock-icon--ready"><use href="#icon-lock-open"/></svg>
+      <svg class="vault-modal__lock-icon vault-modal__lock-icon--ready"><use href="#icon-safe-open"/></svg>
       <h3>${escapeHtml(vault.title)}</h3>
       <p class="card__body" style="white-space:pre-wrap">${escapeHtml(vault.text)}</p>
       <p class="card__body">Trezor se po zavření znovu zapečetí na dalších 365 dní.</p>
