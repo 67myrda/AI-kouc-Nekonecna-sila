@@ -53,13 +53,20 @@ export async function markTodayActivity(category, extraFields) {
     progress[category] = true;
 
     let streak = typeof data.streak === "number" ? data.streak : 0;
+    let totalActiveDays = typeof data.totalActiveDays === "number" ? data.totalActiveDays : 0;
     let lastActiveDate = data.lastActiveDate || null;
     if (lastActiveDate !== today) {
       streak = lastActiveDate === yesterday ? streak + 1 : 1;
+      // "dny s koučem" — kolik různých dní appku vůbec použil, bez ohledu
+      // na mezery mezi nimi. Na rozdíl od streak se nikdy nenuluje, jen
+      // roste. Zvoleno vědomě jako zdravější alternativa k řadě dní bez
+      // přerušení (viz diskuze o Trezoru snů, 28.7.2026) — řídí i typ
+      // zámku (b) u budoucího Trezoru snů.
+      totalActiveDays += 1;
       lastActiveDate = today;
     }
 
-    const payload = { dailyProgress: progress, streak, lastActiveDate, updatedAt: serverTimestamp() };
+    const payload = { dailyProgress: progress, streak, totalActiveDays, lastActiveDate, updatedAt: serverTimestamp() };
     if (extraFields && typeof extraFields === "object") {
       Object.assign(payload, extraFields);
     }

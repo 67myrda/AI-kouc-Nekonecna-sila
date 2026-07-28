@@ -132,7 +132,7 @@ onAuthStateChanged(auth, (user) => {
         return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
       })();
 
-      if (streakEl) streakEl.textContent = String(data.streak || 0);
+      if (streakEl) streakEl.textContent = String(data.totalActiveDays || 0);
 
       const progress = data.dailyProgress && data.dailyProgress.date === todayStr ? data.dailyProgress : null;
       const doneCount = progress ? ["koncept", "kouc", "cile"].filter((k) => progress[k]).length : 0;
