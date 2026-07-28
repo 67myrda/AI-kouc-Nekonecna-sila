@@ -476,6 +476,8 @@ select.text-input{ appearance: none; }
 
 .discovery-tile{ display: flex; flex-direction: column; }
 
+.discovery-tiles .card + .card{ margin-top: 0; }
+
 .discovery-tile__num{
   width: 34px;
   height: 34px;
