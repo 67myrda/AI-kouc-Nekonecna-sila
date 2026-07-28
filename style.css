@@ -16,6 +16,8 @@
 
   --flame: #ff6a4d;
   --flame-muted: #c97159;
+  --flame-muted-2: #a8694f;
+  --cream: #f2e6d3;
   --flame-dim: rgba(255,106,77,0.16);
   --violet: #7c6bf0;
   --violet-dim: rgba(124,107,240,0.16);
@@ -853,12 +855,13 @@ select.text-input{ appearance: none; }
   display: -webkit-box;
   -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
+  color: var(--flame-muted-2);
 }
 
 .vault-tile__type{
   font-family: var(--font-mono);
   font-size: 0.6rem;
-  color: var(--flame-muted);
+  color: var(--cream);
   text-transform: uppercase;
   letter-spacing: 0.03em;
   margin-bottom: 0.2rem;
@@ -867,13 +870,13 @@ select.text-input{ appearance: none; }
 .vault-tile__countdown{
   font-family: var(--font-mono);
   font-size: 0.7rem;
-  color: var(--flame-muted);
+  color: var(--cream);
 }
 
 .vault-tile__progress-label{
   font-family: var(--font-mono);
   font-size: 0.7rem;
-  color: var(--flame-muted);
+  color: var(--cream);
 }
 
 .vault-tile--unlockable{
