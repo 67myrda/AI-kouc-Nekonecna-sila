@@ -465,6 +465,7 @@ select.text-input{ appearance: none; }
 .discovery-tiles{
   display: grid;
   grid-template-columns: 1fr 1fr;
+  align-items: stretch;
   gap: var(--space-sm);
   margin-bottom: var(--space-md);
 }
@@ -478,6 +479,7 @@ select.text-input{ appearance: none; }
 .discovery-tile__num{
   width: 34px;
   height: 34px;
+  flex-shrink: 0;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -487,8 +489,13 @@ select.text-input{ appearance: none; }
   font-family: var(--font-mono);
   font-weight: 700;
   font-size: 0.9rem;
+  line-height: 1;
   margin-bottom: 0.5rem;
 }
+
+.discovery-tile .card__title{ line-height: 1.3; }
+
+.discovery-tile .card__body{ min-height: 5.6rem; }
 
 .discovery-tile__btn{ margin-top: auto; align-self: flex-start; }
 
