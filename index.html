@@ -51,6 +51,9 @@
     <symbol id="icon-capsule" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2 3 7v10l9 5 9-5V7Zm0 2.3L18.5 8 12 11.7 5.5 8Z"/></symbol>
     <symbol id="icon-bell" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a6 6 0 0 0-6 6v4l-2 4h16l-2-4V8a6 6 0 0 0-6-6Zm0 20a3 3 0 0 0 3-3H9a3 3 0 0 0 3 3Z"/></symbol>
     <symbol id="icon-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="2" fill="currentColor"/><circle cx="12" cy="12" r="2" fill="currentColor"/><circle cx="19" cy="12" r="2" fill="currentColor"/></symbol>
+    <symbol id="icon-lock-closed" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="16" r="1.6" fill="currentColor"/></symbol>
+    <symbol id="icon-lock-open" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 11V7a4 4 0 0 1 7.2-2.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="16" r="1.6" fill="currentColor"/></symbol>
+    <symbol id="icon-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
 
     <!-- vlastní "jiskra" — inspirace tvým logem, vlastní kresba (ne kopie loga Anthropicu) -->
     <symbol id="icon-spark" viewBox="0 0 100 100">
@@ -391,23 +394,28 @@
     <!-- ---------- DENÍK / ČASOVÁ SCHRÁNKA ---------- -->
     <section class="view" id="view-denik" data-view="denik">
       <div class="view__header">
-        <span class="eyebrow">Deník &amp; časová schránka</span>
+        <span class="eyebrow">Deník &amp; Trezor snů</span>
         <h1>Tvoje poznámky napříč časem</h1>
-        <p class="view__lede">Inspirováno tvým vlastním sešitem — appka umí „zapečetit“ cíle a připomenout ti je za rok nebo za pět let.</p>
+        <p class="view__lede">Inspirováno tvým vlastním sešitem — appka umí „zapečetit“ sen na dlouhou dobu a připomenout ti ho, až přijde čas.</p>
       </div>
 
-      <div class="capsule-card">
-        <svg class="spark-icon" viewBox="0 0 24 24" style="width:28px;height:28px;color:var(--gold)"><use href="#icon-capsule"/></svg>
-        <h3>Časová schránka</h3>
-        <p>Napiš si dnešní cíle a appka ti je připomene v budoucnu — přesně jako ten sešit, který jsi po patnácti letech znovu otevřel. Funkční ukládání přijde ve Fázi 2.</p>
-        <button class="btn btn--primary" style="margin-top:1rem" disabled>Vytvořit schránku (Fáze 2)</button>
+      <div class="card" style="margin-bottom:1rem">
+        <div class="card__title">🔒 Trezor snů</div>
+        <p class="card__body">Napiš si sen nebo cíl na vzdálenou budoucnost. Trezorů je omezený počet — neplýtvej jimi na malé věci, každý si zaslouží jeden velký, komplexní sen.</p>
       </div>
+
+      <div class="vault-grid" id="vault-grid"></div>
 
       <div class="empty-state card" style="margin-top:1.5rem">
         <h3>Zatím žádný zápis</h3>
         <p>Běžné deníkové zápisky z lekcí a cvičení se tu budou hromadit postupně.</p>
       </div>
     </section>
+
+    <div class="vault-modal" id="vault-modal" style="display:none">
+      <div class="vault-modal__backdrop" id="vault-modal-backdrop"></div>
+      <div class="vault-modal__panel" id="vault-modal-panel"></div>
+    </div>
 
     <!-- ---------- PŘIPOMÍNKY ---------- -->
     <section class="view" id="view-pripominky" data-view="pripominky">
@@ -475,5 +483,6 @@
 <script type="module" src="firestore-goals-values.js?v=5"></script>
 <script type="module" src="ai-coach.js?v=6"></script>
 <script type="module" src="dnes-data.js?v=3"></script>
+<script type="module" src="time-vault.js?v=1"></script>
 </body>
 </html>

@@ -777,6 +777,157 @@ select.text-input{ appearance: none; }
 }
 
 /* ============================================================
+   Trezor snů — mřížka 7 dlaždic + modál na zapečetění/otevření
+   ============================================================ */
+
+.vault-grid{
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: var(--space-sm);
+}
+
+.vault-tile{
+  aspect-ratio: 1 / 1;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0.8rem;
+  cursor: pointer;
+  transition: border-color 0.2s, transform 0.15s;
+}
+
+.vault-tile:active{ transform: scale(0.97); }
+
+.vault-tile--empty{
+  border-style: dashed;
+  border-color: var(--border-strong);
+  color: var(--text-faint);
+}
+
+.vault-tile__icon{
+  width: 26px;
+  height: 26px;
+  margin-bottom: 0.5rem;
+  color: var(--text-muted);
+}
+
+.vault-tile--empty .vault-tile__icon{ color: var(--text-faint); }
+
+.vault-tile__empty-label{ font-size: 0.78rem; }
+
+.vault-tile__title{
+  font-size: 0.88rem;
+  font-weight: 600;
+  line-height: 1.25;
+  margin-bottom: 0.2rem;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.vault-tile__type{
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 0.35rem;
+}
+
+.vault-tile__countdown{
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.vault-tile__progress-label{
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.vault-tile--unlockable{
+  border-color: var(--flame);
+  box-shadow: 0 0 16px var(--flame-dim);
+  animation: vault-pulse 1.8s ease-in-out infinite;
+}
+
+.vault-tile--unlockable .vault-tile__icon{ color: var(--flame); }
+.vault-tile__countdown--ready{ color: var(--flame); font-weight: 700; }
+
+@keyframes vault-pulse{
+  0%, 100%{ box-shadow: 0 0 10px var(--flame-dim); }
+  50%{ box-shadow: 0 0 22px var(--flame-dim); }
+}
+
+.vault-tile--open{ border-color: var(--gold-dim); }
+.vault-tile--open .vault-tile__icon{ color: var(--gold); }
+
+.vault-locktype-choice{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.4rem;
+}
+
+.vault-locktype-btn.is-selected{
+  border-color: var(--flame);
+  color: var(--flame);
+}
+
+.vault-modal{
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+@media (min-width: 640px){
+  .vault-modal{ align-items: center; }
+}
+
+.vault-modal__backdrop{
+  position: absolute;
+  inset: 0;
+  background: rgba(10,8,18,0.72);
+  backdrop-filter: blur(2px);
+}
+
+.vault-modal__panel{
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 520px;
+  max-height: 88vh;
+  overflow-y: auto;
+  background: var(--bg-elevated-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  padding: var(--space-md);
+}
+
+@media (min-width: 640px){
+  .vault-modal__panel{ border-radius: var(--radius-md); }
+}
+
+.vault-modal__lock-icon{
+  width: 40px;
+  height: 40px;
+  color: var(--text-muted);
+  margin-bottom: 0.6rem;
+}
+
+.vault-modal__lock-icon--ready{ color: var(--flame); }
+
+/* ============================================================
    Dnes — hero banner: generovaná vlnící se struktura na pozadí,
    text přímo na ní (canvas animace, ne statický obrázek)
    ============================================================ */
