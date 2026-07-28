@@ -794,10 +794,11 @@ select.text-input{ appearance: none; }
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   text-align: center;
-  padding: 0.8rem;
+  padding: 0.5rem 0.5rem 0.6rem;
   cursor: pointer;
+  overflow: hidden;
   transition: border-color 0.2s, transform 0.15s;
 }
 
@@ -807,49 +808,58 @@ select.text-input{ appearance: none; }
   border-style: dashed;
   border-color: var(--border-strong);
   color: var(--text-faint);
+  justify-content: center;
 }
 
 .vault-tile__icon{
-  width: 56px;
-  height: 56px;
+  width: 40px;
+  height: 40px;
   margin-bottom: 0.5rem;
-  color: var(--text-muted);
-  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.4));
+  color: var(--text-faint);
 }
-
-.vault-tile--empty .vault-tile__icon{ color: var(--text-faint); }
 
 .vault-tile__empty-label{ font-size: 0.78rem; }
 
+.vault-tile__image{
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  object-fit: contain;
+  margin-bottom: 0.3rem;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.45));
+}
+
+.vault-tile__caption{ width: 100%; flex-shrink: 0; }
+
 .vault-tile__title{
-  font-size: 0.88rem;
+  font-size: 0.86rem;
   font-weight: 600;
-  line-height: 1.25;
-  margin-bottom: 0.2rem;
+  line-height: 1.2;
+  margin-bottom: 0.15rem;
   overflow: hidden;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
 }
 
 .vault-tile__type{
   font-family: var(--font-mono);
-  font-size: 0.62rem;
+  font-size: 0.6rem;
   color: var(--text-faint);
   text-transform: uppercase;
   letter-spacing: 0.03em;
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.2rem;
 }
 
 .vault-tile__countdown{
   font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   color: var(--text-muted);
 }
 
 .vault-tile__progress-label{
   font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   color: var(--text-muted);
 }
 
@@ -859,7 +869,6 @@ select.text-input{ appearance: none; }
   animation: vault-pulse 1.8s ease-in-out infinite;
 }
 
-.vault-tile--unlockable .vault-tile__icon{ color: var(--flame); }
 .vault-tile__countdown--ready{ color: var(--flame); font-weight: 700; }
 
 @keyframes vault-pulse{
@@ -868,7 +877,7 @@ select.text-input{ appearance: none; }
 }
 
 .vault-tile--open{ border-color: var(--gold-dim); }
-.vault-tile--open .vault-tile__icon{ color: var(--gold); }
+
 
 .vault-locktype-choice{
   display: flex;
