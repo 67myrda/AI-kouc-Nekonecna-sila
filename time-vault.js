@@ -140,7 +140,7 @@ function renderGrid() {
     if (!vault) {
       tile.className = "vault-tile vault-tile--empty";
       tile.innerHTML = `
-        <svg class="vault-tile__icon"><use href="#icon-plus"/></svg>
+        <img class="vault-tile__image vault-tile__image--empty" src="trezor-otevreny.webp" alt="" loading="lazy">
         <span class="vault-tile__empty-label">Nový trezor snů</span>
       `;
       tile.addEventListener("click", () => openCreateForm());
@@ -166,7 +166,9 @@ function renderGrid() {
       sub = `<div class="vault-tile__countdown">Trvale otevřeno</div>`;
     }
 
-    const imageSrc = status === "sealed" ? "trezor-zavreny.webp" : "trezor-otevreny.webp";
+    // zavřený obrázek = zamčeno (sealed i unlockable — rozdíl je jen v
+    // barevném zvýraznění rámu), otevřený obrázek = trvale odhaleno
+    const imageSrc = status === "open" ? "trezor-otevreny.webp" : "trezor-zavreny.webp";
     tile.innerHTML = `
       <img class="vault-tile__image" src="${imageSrc}" alt="" loading="lazy">
       <div class="vault-tile__caption">
@@ -308,7 +310,7 @@ function openVaultTile(vault, status) {
 
   // status === "unlockable" — potvrzovací krok, pak odhalení
   openModal(`
-    <img class="vault-modal__lock-icon vault-modal__lock-icon--ready" src="trezor-otevreny.webp" alt="">
+    <img class="vault-modal__lock-icon vault-modal__lock-icon--ready" src="trezor-zavreny.webp" alt="">
     <h3>${escapeHtml(vault.title)}</h3>
     <p class="card__body">Tenhle trezor je připravený k otevření. Opravdu chceš nahlédnout?</p>
     <div class="form-actions">

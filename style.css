@@ -15,6 +15,7 @@
   --text-faint: #726a92;
 
   --flame: #ff6a4d;
+  --flame-muted: #c97159;
   --flame-dim: rgba(255,106,77,0.16);
   --violet: #7c6bf0;
   --violet-dim: rgba(124,107,240,0.16);
@@ -780,6 +781,13 @@ select.text-input{ appearance: none; }
    Trezor snů — mřížka 7 dlaždic + modál na zapečetění/otevření
    ============================================================ */
 
+.inline-icon{
+  width: 0.85em;
+  height: 0.85em;
+  vertical-align: -0.1em;
+  color: currentColor;
+}
+
 .vault-grid{
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
@@ -829,6 +837,11 @@ select.text-input{ appearance: none; }
   filter: drop-shadow(0 4px 12px rgba(0,0,0,0.45));
 }
 
+.vault-tile__image--empty{
+  opacity: 0.4;
+  filter: grayscale(0.6) drop-shadow(0 4px 12px rgba(0,0,0,0.3));
+}
+
 .vault-tile__caption{ width: 100%; flex-shrink: 0; }
 
 .vault-tile__title{
@@ -845,7 +858,7 @@ select.text-input{ appearance: none; }
 .vault-tile__type{
   font-family: var(--font-mono);
   font-size: 0.6rem;
-  color: var(--text-faint);
+  color: var(--flame-muted);
   text-transform: uppercase;
   letter-spacing: 0.03em;
   margin-bottom: 0.2rem;
@@ -854,13 +867,13 @@ select.text-input{ appearance: none; }
 .vault-tile__countdown{
   font-family: var(--font-mono);
   font-size: 0.7rem;
-  color: var(--text-muted);
+  color: var(--flame-muted);
 }
 
 .vault-tile__progress-label{
   font-family: var(--font-mono);
   font-size: 0.7rem;
-  color: var(--text-muted);
+  color: var(--flame-muted);
 }
 
 .vault-tile--unlockable{
