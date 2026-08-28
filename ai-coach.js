@@ -410,6 +410,8 @@ window.addEventListener("concept-coach-start", (e) => {
     if (window.showView) window.showView("kouc");
     messagesEl.scrollTop = messagesEl.scrollHeight;
     scrollInputIntoView();
+
+    const primingText =
       `Chci si dnes projít koncept „${concept.title}“ z knihy Nekonečná síla. ${concept.desc} ` +
       `Uveď mě krátce do tématu a proveď mě jedním praktickým cvičením na to, krok po kroku — polož mi vždy jen jednu otázku a počkej na odpověď, ať to nejen čtu, ale zkusím naživo.`;
 
