@@ -1304,6 +1304,16 @@ select.text-input{ appearance: none; }
   min-height: 0;
 }
 
+.chat-bubble--notice{
+  max-width: 92%;
+  background: var(--gold-dim);
+  border: 1px solid rgba(255,201,74,0.35);
+  color: var(--cream);
+  font-size: 0.78rem;
+  font-style: italic;
+  padding: 0.55rem 0.8rem;
+}
+
 .chat-bubble--typing{
   display: flex; gap: 4px; align-items: center;
   padding: 0.9rem 1rem;

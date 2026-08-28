@@ -118,6 +118,21 @@ function addBubble(role, text, container) {
   return bubble;
 }
 
+// Zobrazí jemné, ale viditelné upozornění, když odpověď kouče v krokovaném
+// režimu neobsahuje očekávanou značku [[KROK n]] / [[SHRNUTI]] — appka to
+// dřív jen tiše zobrazila jako obyčejnou bublinu a postup/karty se přestaly
+// aktualizovat, aniž by si toho uživatel všiml. Netýká se běžného chatu
+// (tam žádné značky nejsou očekávané).
+function addStepNotice(text) {
+  const container = stepLiveEl || messagesEl;
+  const notice = document.createElement("div");
+  notice.className = "chat-bubble chat-bubble--notice";
+  notice.textContent = text;
+  container.appendChild(notice);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+  return notice;
+}
+
 function addTypingBubble(container) {
   const target = container || messagesEl;
   const bubble = document.createElement("div");
@@ -337,6 +352,7 @@ async function callCoach(apiText, showUserBubble) {
         addBubble("coach", parsed.displayText, stepLiveEl);
       } else {
         addBubble("coach", parsed.displayText, stepLiveEl || messagesEl);
+        addStepNotice("⚠️ Kouč tentokrát nepoužil krokovou značku — postup/karta se teď nemusí aktualizovat správně. Klidně pokračuj, nebo napiš „shrň, kde jsme skončili".");
       }
     } else {
       addBubble("coach", rawReply, container);
