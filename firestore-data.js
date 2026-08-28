@@ -14,6 +14,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 import { markTodayActivity } from "./progress.js";
+import { writeJournalEntry } from "./journal.js";
 
 const db = getFirestore(app);
 
@@ -47,7 +48,7 @@ function applyConceptsToUI(concepts) {
   });
 }
 
-async function toggleConcept(slug) {
+async function toggleConcept(slug, title) {
   const user = auth.currentUser;
   if (!user) return;
 
@@ -68,7 +69,10 @@ async function toggleConcept(slug) {
   );
   // Neaktualizujeme UI ručně tady — onSnapshot níže to udělá samo,
   // jakmile se zápis potvrdí (funguje to i napříč zařízeními).
-  if (next[slug]) markTodayActivity("koncept");
+  if (next[slug]) {
+    markTodayActivity("koncept");
+    writeJournalEntry("koncept", `Dokončeno: ${title || slug}`);
+  }
 }
 
 conceptCards.forEach((card) => {
@@ -76,7 +80,8 @@ conceptCards.forEach((card) => {
   const btn = card.querySelector(".concept-toggle");
   btn?.addEventListener("click", () => {
     btn.disabled = true;
-    toggleConcept(slug).finally(() => {
+    const title = card.querySelector("h3")?.textContent?.trim() || slug;
+    toggleConcept(slug, title).finally(() => {
       btn.disabled = false;
     });
   });

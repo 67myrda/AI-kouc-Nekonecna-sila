@@ -20,6 +20,7 @@ import {
   serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 import { markTodayActivity } from "./progress.js";
+import { writeJournalEntry } from "./journal.js";
 
 const WORKER_URL = "https://ai-kouc-proxy.67myrda.workers.dev/";
 const db = getFirestore(app);
@@ -285,6 +286,7 @@ async function saveSummaryAsGoal(title, desc, cardEl) {
         discoveredVia: discoveryInfo ? `mode${discoveryInfo.mode}` : null,
       });
       markTodayActivity("cile");
+      writeJournalEntry("cile", `Nový cíl: ${title || "Nový cíl"}`);
     }
     btn.textContent = "Uloženo ✓";
   } catch (err) {
@@ -406,8 +408,8 @@ window.addEventListener("concept-coach-start", (e) => {
       throw new Error("Chybí data konceptu (concept-coach-start bez detailu).");
     }
     if (window.showView) window.showView("kouc");
-
-    const primingText =
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+    scrollInputIntoView();
       `Chci si dnes projít koncept „${concept.title}“ z knihy Nekonečná síla. ${concept.desc} ` +
       `Uveď mě krátce do tématu a proveď mě jedním praktickým cvičením na to, krok po kroku — polož mi vždy jen jednu otázku a počkej na odpověď, ať to nejen čtu, ale zkusím naživo.`;
 
@@ -422,6 +424,7 @@ window.addEventListener("concept-coach-start", (e) => {
       },
     });
     callCoach(primingText, false);
+    writeJournalEntry("kouc", `Lekce: ${concept.title}`);
   } catch (err) {
     console.error("Spuštění lekce z konceptu selhalo:", err);
     if (window.showView) window.showView("kouc");
@@ -524,6 +527,7 @@ function switchToCoachView() {
   if (moreSheet) moreSheet.classList.remove("is-open");
   window.location.hash = "kouc";
   window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
+  messagesEl.scrollTop = messagesEl.scrollHeight;
 }
 
 /* ==================== VEDENÍ 12 KROKŮ K EXISTUJÍCÍMU CÍLI ==================== */
