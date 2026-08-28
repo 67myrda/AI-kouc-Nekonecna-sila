@@ -12,6 +12,25 @@
 
 <link rel="stylesheet" href="style.css">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+<!-- DOČASNÉ — diagnostika chyby "kouč mlčí", odstranit po dořešení -->
+<div id="debug-error-banner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:99999;background:#7a1f1f;color:#fff;font:11px/1.4 monospace;padding:8px 10px;white-space:pre-wrap;word-break:break-word;max-height:40vh;overflow:auto;"></div>
+<script>
+(function () {
+  var banner = document.getElementById("debug-error-banner");
+  function show(msg) {
+    banner.style.display = "block";
+    banner.textContent += msg + "\n\n";
+  }
+  window.addEventListener("error", function (e) {
+    show("JS chyba: " + e.message + "\n  v " + (e.filename || "?") + ":" + (e.lineno || "?") + ":" + (e.colno || "?"));
+  });
+  window.addEventListener("unhandledrejection", function (e) {
+    var r = e.reason;
+    show("Neošetřená chyba (promise): " + (r && r.message ? r.message : String(r)) + (r && r.stack ? "\n" + r.stack : ""));
+  });
+})();
+</script>
 </head>
 <body class="is-locked">
 
