@@ -353,7 +353,7 @@ async function callCoach(apiText, showUserBubble) {
         addBubble("coach", parsed.displayText, stepLiveEl);
       } else {
         addBubble("coach", parsed.displayText, stepLiveEl || messagesEl);
-        addStepNotice("⚠️ Kouč tentokrát nepoužil krokovou značku — postup/karta se teď nemusí aktualizovat správně. Klidně pokračuj, nebo napiš „shrň, kde jsme skončili".");
+        addStepNotice("⚠️ Kouč tentokrát nepoužil krokovou značku — postup/karta se teď nemusí aktualizovat správně. Klidně pokračuj, nebo napiš „shrň, kde jsme skončili“.");
       }
     } else {
       addBubble("coach", rawReply, container);
