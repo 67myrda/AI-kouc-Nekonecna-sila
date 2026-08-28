@@ -80,6 +80,18 @@ conceptCards.forEach((card) => {
       btn.disabled = false;
     });
   });
+
+  // Nové: "Spustit lekci" — ruční výběr konceptu, o kterém appka na "Dnes"
+  // mluví jako o možnosti ("Vybrat jiné téma"), ale dřív tu chybělo cokoli,
+  // co by se dalo skutečně spustit — jen přepínač "Označit jako splněné".
+  const startBtn = card.querySelector(".concept-start");
+  startBtn?.addEventListener("click", () => {
+    const title = card.querySelector("h3")?.textContent?.trim() || slug;
+    const desc = card.querySelector("p")?.textContent?.trim() || "";
+    window.dispatchEvent(new CustomEvent("concept-coach-start", {
+      detail: { slug, title, desc },
+    }));
+  });
 });
 
 onAuthStateChanged(auth, (user) => {

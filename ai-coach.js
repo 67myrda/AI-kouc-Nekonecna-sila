@@ -105,6 +105,7 @@ async function loadGeneralHistory(user) {
     });
   } catch (err) {
     console.error("Načtení historie rozhovoru selhalo:", err);
+    addBubble("coach", "Nepodařilo se načíst historii rozhovoru (" + (err.message || err) + "). Zprávy odsud dál fungují, jen chybí ty starší.");
   }
 }
 
@@ -399,24 +400,33 @@ onAuthStateChanged(auth, async (user) => {
 /* ==================== SPUŠTĚNÍ DNEŠNÍ LEKCE (koncept z "Dnes") ==================== */
 
 window.addEventListener("concept-coach-start", (e) => {
-  const concept = e.detail; // { slug, title, desc }
-  if (window.showView) window.showView("kouc");
+  try {
+    const concept = e.detail; // { slug, title, desc }
+    if (!concept || !concept.title) {
+      throw new Error("Chybí data konceptu (concept-coach-start bez detailu).");
+    }
+    if (window.showView) window.showView("kouc");
 
-  const primingText =
-    `Chci si dnes projít koncept „${concept.title}“ z knihy Nekonečná síla. ${concept.desc} ` +
-    `Uveď mě krátce do tématu a proveď mě jedním praktickým cvičením na to, krok po kroku — polož mi vždy jen jednu otázku a počkej na odpověď, ať to nejen čtu, ale zkusím naživo.`;
+    const primingText =
+      `Chci si dnes projít koncept „${concept.title}“ z knihy Nekonečná síla. ${concept.desc} ` +
+      `Uveď mě krátce do tématu a proveď mě jedním praktickým cvičením na to, krok po kroku — polož mi vždy jen jednu otázku a počkej na odpověď, ať to nejen čtu, ale zkusím naživo.`;
 
-  // strukturovaný signál pro "Dnes" — jaký koncept se naposledy reálně
-  // začal probírat s koučem. Explicitní zápis při startu lekce, ne odhad
-  // z textu chatu — vždy jednoznačné, ověřitelné, odolné vůči změnám textů.
-  markTodayActivity("kouc", {
-    lastConceptDiscussed: {
-      slug: concept.slug || null,
-      title: concept.title || null,
-      at: serverTimestamp(),
-    },
-  });
-  callCoach(primingText, false);
+    // strukturovaný signál pro "Dnes" — jaký koncept se naposledy reálně
+    // začal probírat s koučem. Explicitní zápis při startu lekce, ne odhad
+    // z textu chatu — vždy jednoznačné, ověřitelné, odolné vůči změnám textů.
+    markTodayActivity("kouc", {
+      lastConceptDiscussed: {
+        slug: concept.slug || null,
+        title: concept.title || null,
+        at: serverTimestamp(),
+      },
+    });
+    callCoach(primingText, false);
+  } catch (err) {
+    console.error("Spuštění lekce z konceptu selhalo:", err);
+    if (window.showView) window.showView("kouc");
+    addBubble("coach", "Spuštění dnešní lekce se nepovedlo (" + (err.message || err) + "). Zkus to prosím znovu, nebo napiš koučovi rovnou, o čem chceš mluvit.");
+  }
 });
 
 /* ==================== HLEDÁNÍ CÍLE — SPOLEČNÝ RESET STAVU ==================== */
