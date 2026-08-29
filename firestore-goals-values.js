@@ -18,6 +18,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 import { markTodayActivity } from "./progress.js";
+import { ensureThread } from "./threads.js";
 
 const db = getFirestore(app);
 
@@ -85,13 +86,14 @@ goalSaveBtn.addEventListener("click", async () => {
   }
   goalSaveBtn.disabled = true;
   try {
-    await addDoc(collection(db, "users", user.uid, "goals"), {
+    const goalRef = await addDoc(collection(db, "users", user.uid, "goals"), {
       title,
       description: goalDescInput.value.trim(),
       targetDate: goalDateInput.value || null,
       status: "active",
       createdAt: serverTimestamp(),
     });
+    await ensureThread(goalRef.id, { type: "cil", goalId: goalRef.id, title });
     goalCancelBtn.click();
     markTodayActivity("cile");
   } catch (err) {

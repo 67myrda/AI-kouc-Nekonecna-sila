@@ -11,16 +11,13 @@ import {
   getFirestore,
   collection,
   addDoc,
-  getDocs,
-  query,
-  orderBy,
-  limit,
   doc,
   updateDoc,
   serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 import { markTodayActivity } from "./progress.js";
 import { writeJournalEntry } from "./journal.js";
+import { PILIR_TITLES, ensureThread, loadThreadMessages, addThreadMessage, updateThreadSummary } from "./threads.js";
 
 const WORKER_URL = "https://ai-kouc-proxy.67myrda.workers.dev/";
 const db = getFirestore(app);
@@ -52,6 +49,10 @@ let stepLiveEl = null; // aktuálně "otevřený" (neshrnovaný) kontejner kroku
 let stepLiveLabel = "";
 let sending = false;
 let historyLoaded = false;
+// Fáze 1 vláken: kterou konverzaci právě vedeme mimo krokovaný režim
+// (Volný rozhovor, nebo jeden z 5 Pilířů). Krokovaný režim (Hledání
+// cíle) má zatím vlastní, samostatný mechanismus — nedotčen touto fází.
+let activeThreadId = "volny";
 
 // appka posílá Claude API celou historii při každé zprávě — u dlouhodobě
 // vedeného deníku by to časem zbytečně prodražovalo každý dotaz, tak na
@@ -73,41 +74,35 @@ function escapeHtmlLocal(str) {
   return div.innerHTML;
 }
 
-// uložení jedné zprávy obecného (necíleného) rozhovoru do Firestore —
+// uložení jedné zprávy do právě aktivního vlákna (Volný rozhovor / Pilíř) —
 // krokovaně vedené rozhovory (cíl / objevování) se ukládají zvlášť, tlačítkem
 async function persistGeneralMessage(role, text) {
-  const user = auth.currentUser;
-  if (!user) return;
-  try {
-    await addDoc(collection(db, "users", user.uid, "coachMessages"), {
-      role,
-      text,
-      createdAt: serverTimestamp(),
-    });
-  } catch (err) {
-    console.error("Uložení zprávy do historie rozhovoru selhalo:", err);
-  }
+  await addThreadMessage(activeThreadId, role, text, threadMetaFor(activeThreadId));
 }
 
-// načtení uložené historie obecného rozhovoru při otevření appky
-async function loadGeneralHistory(user) {
-  try {
-    const q = query(
-      collection(db, "users", user.uid, "coachMessages"),
-      orderBy("createdAt", "asc"),
-      limit(200)
-    );
-    const snap = await getDocs(q);
-    snap.forEach((docSnap) => {
-      const m = docSnap.data();
-      if (!m || !m.text) return;
-      addBubble(m.role === "user" ? "user" : "coach", m.text);
-      history.push({ role: m.role === "user" ? "user" : "assistant", content: m.text });
-    });
-  } catch (err) {
-    console.error("Načtení historie rozhovoru selhalo:", err);
-    addBubble("coach", "Nepodařilo se načíst historii rozhovoru (" + (err.message || err) + "). Zprávy odsud dál fungují, jen chybí ty starší.");
+function threadMetaFor(threadId) {
+  if (threadId === "volny") return { type: "volny", title: "Volný rozhovor" };
+  if (PILIR_TITLES[threadId]) return { type: "pilir", key: threadId, title: PILIR_TITLES[threadId] };
+  return { type: "volny", title: "Rozhovor" };
+}
+
+// Přepne appku na jiné vlákno: vyprázdní chat na obrazovce, nahraje
+// uloženou historii TOHOTO vlákna a nastaví ho jako aktivní pro další
+// zprávy. Když appku teprve otevíráš (fromInit=true), messagesEl se
+// nemaže (je už prázdný) a jen se rovnou naplní.
+async function switchThread(threadId, { fromInit = false } = {}) {
+  activeThreadId = threadId;
+  if (!fromInit) {
+    messagesEl.innerHTML = "";
   }
+  history = [];
+  const msgs = await loadThreadMessages(threadId);
+  msgs.forEach((m) => {
+    if (!m || !m.text) return;
+    addBubble(m.role === "user" ? "user" : "coach", m.text);
+    history.push({ role: m.role === "user" ? "user" : "assistant", content: m.text });
+  });
+  return msgs.length;
 }
 
 function addBubble(role, text, container) {
@@ -274,8 +269,10 @@ async function saveSummaryAsGoal(title, desc, cardEl) {
         outcomeThinkingTranscript: transcriptText,
         outcomeThinkingUpdatedAt: serverTimestamp(),
       });
+      await ensureThread(activeGoal.id, { type: "cil", goalId: activeGoal.id, title: title || activeGoal.title });
+      await updateThreadSummary(activeGoal.id, desc || "");
     } else {
-      await addDoc(collection(db, "users", user.uid, "goals"), {
+      const goalRef = await addDoc(collection(db, "users", user.uid, "goals"), {
         title: title || "Nový cíl",
         description: desc || "",
         targetDate: null,
@@ -285,6 +282,8 @@ async function saveSummaryAsGoal(title, desc, cardEl) {
         createdAt: serverTimestamp(),
         discoveredVia: discoveryInfo ? `mode${discoveryInfo.mode}` : null,
       });
+      await ensureThread(goalRef.id, { type: "cil", goalId: goalRef.id, title: title || "Nový cíl" });
+      await updateThreadSummary(goalRef.id, desc || "");
       markTodayActivity("cile");
       writeJournalEntry("cile", `Nový cíl: ${title || "Nový cíl"}`);
     }
@@ -389,11 +388,23 @@ inputEl.addEventListener("keydown", (e) => {
   if (e.key === "Enter") sendMessage();
 });
 
+// Přímý klik na "Kouč" v navigaci (ne přes konkrétní koncept/cíl) vždy
+// znamená Volný rozhovor — pokud appka zrovna ukazuje jiné vlákno
+// (Pilíř), přepneme zpátky. V krokovaném režimu (Hledání cíle) do
+// téhle logiky nezasahujeme, to má svůj vlastní mechanismus opuštění.
+document.querySelectorAll('button[data-view="kouc"]').forEach((btn) => {
+  btn.addEventListener("click", () => {
+    if (!guidedMode && activeThreadId !== "volny") {
+      switchThread("volny");
+    }
+  });
+});
+
 onAuthStateChanged(auth, async (user) => {
   if (!user) return;
   if (historyLoaded) return;
   historyLoaded = true;
-  await loadGeneralHistory(user);
+  await switchThread("volny", { fromInit: true });
   if (messagesEl.childElementCount === 0) {
     addBubble("coach", "Ahoj! Na čem chceš dneska pracovat — na stavu, na přesvědčení, na kotvení, nebo si probereme cíl?");
   }
@@ -402,18 +413,32 @@ onAuthStateChanged(auth, async (user) => {
 /* ==================== SPUŠTĚNÍ DNEŠNÍ LEKCE (koncept z "Dnes") ==================== */
 
 window.addEventListener("concept-coach-start", (e) => {
+  (async () => {
   try {
     const concept = e.detail; // { slug, title, desc }
     if (!concept || !concept.title) {
       throw new Error("Chybí data konceptu (concept-coach-start bez detailu).");
     }
     if (window.showView) window.showView("kouc");
+
+    // Fáze 1 vláken: Pilíř má vlastní konverzaci, oddělenou od Volného
+    // rozhovoru i ostatních Pilířů — appka nejdřív nahraje jeho dosavadní
+    // historii (kontinuita), teprve pak pošle nové zadání lekce.
+    const threadId = PILIR_TITLES[concept.slug] ? concept.slug : "volny";
+    let hadHistory;
+    if (threadId !== activeThreadId) {
+      hadHistory = (await switchThread(threadId)) > 0;
+    } else {
+      hadHistory = messagesEl.childElementCount > 0;
+    }
+
     messagesEl.scrollTop = messagesEl.scrollHeight;
     scrollInputIntoView();
 
-    const primingText =
-      `Chci si dnes projít koncept „${concept.title}“ z knihy Nekonečná síla. ${concept.desc} ` +
-      `Uveď mě krátce do tématu a proveď mě jedním praktickým cvičením na to, krok po kroku — polož mi vždy jen jednu otázku a počkej na odpověď, ať to nejen čtu, ale zkusím naživo.`;
+    const primingText = hadHistory
+      ? `Vracím se k tématu „${concept.title}“ z knihy Nekonečná síla. Naväž prosím krátce na to, kde jsme skončili, a pokračuj dál — případně mi dej další praktické cvičení.`
+      : `Chci si dnes projít koncept „${concept.title}“ z knihy Nekonečná síla. ${concept.desc} ` +
+        `Uveď mě krátce do tématu a proveď mě jedním praktickým cvičením na to, krok po kroku — polož mi vždy jen jednu otázku a počkej na odpověď, ať to nejen čtu, ale zkusím naživo.`;
 
     // strukturovaný signál pro "Dnes" — jaký koncept se naposledy reálně
     // začal probírat s koučem. Explicitní zápis při startu lekce, ne odhad
@@ -432,6 +457,7 @@ window.addEventListener("concept-coach-start", (e) => {
     if (window.showView) window.showView("kouc");
     addBubble("coach", "Spuštění dnešní lekce se nepovedlo (" + (err.message || err) + "). Zkus to prosím znovu, nebo napiš koučovi rovnou, o čem chceš mluvit.");
   }
+  })();
 });
 
 /* ==================== HLEDÁNÍ CÍLE — SPOLEČNÝ RESET STAVU ==================== */
@@ -498,6 +524,7 @@ goalSaveBtn.addEventListener("click", async () => {
       outcomeThinkingTranscript: transcriptText,
       outcomeThinkingUpdatedAt: serverTimestamp(),
     });
+    await ensureThread(activeGoal.id, { type: "cil", goalId: activeGoal.id, title: activeGoal.title });
     goalSaveBtn.textContent = "Uloženo ✓";
     setTimeout(() => {
       goalSaveBtn.textContent = originalLabel;
