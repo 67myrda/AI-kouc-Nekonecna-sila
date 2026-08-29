@@ -17,7 +17,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 import { markTodayActivity } from "./progress.js";
 import { writeJournalEntry } from "./journal.js";
-import { PILIR_TITLES, ensureThread, loadThreadMessages, addThreadMessage, updateThreadSummary } from "./threads.js";
+import { PILIR_TITLES, ensureThread, loadThreadMessages, addThreadMessage, updateThreadSummary, getThreadMeta } from "./threads.js";
 import { saveValueProfile } from "./values-coach.js";
 
 const WORKER_URL = "https://ai-kouc-proxy.67myrda.workers.dev/";
@@ -31,6 +31,13 @@ const goalBanner = document.getElementById("goal-coach-banner");
 const goalBannerTitle = document.getElementById("goal-coach-banner-title");
 const goalSaveBtn = document.getElementById("goal-coach-save-btn");
 const goalExitBtn = document.getElementById("goal-coach-exit-btn");
+
+const threadCurrentBtn = document.getElementById("thread-current-btn");
+const threadCurrentIcon = document.getElementById("thread-current-icon");
+const threadCurrentLabel = document.getElementById("thread-current-label");
+const threadListToggle = document.getElementById("thread-list-toggle");
+const threadPanel = document.getElementById("thread-panel");
+const threadBar = document.querySelector(".thread-bar");
 
 const stepProgressEl = document.getElementById("step-progress");
 const stepProgressLabelEl = document.getElementById("step-progress-label");
@@ -88,9 +95,96 @@ async function persistGeneralMessage(role, text) {
 
 function threadMetaFor(threadId) {
   if (threadId === "volny") return { type: "volny", title: "Volný rozhovor" };
+  if (threadId === "hodnoty") return { type: "hodnoty", title: "Hodnoty" };
   if (PILIR_TITLES[threadId]) return { type: "pilir", key: threadId, title: PILIR_TITLES[threadId] };
   return { type: "volny", title: "Rozhovor" };
 }
+
+/* ==================== FÁZE 3: LIŠTA + SEZNAM VLÁKEN ==================== */
+
+const THREAD_ICON = {
+  volny: "#icon-coach",
+  hodnoty: "#icon-values",
+};
+function iconForThread(threadId) {
+  if (THREAD_ICON[threadId]) return THREAD_ICON[threadId];
+  if (PILIR_TITLES[threadId]) return "#icon-concepts";
+  return "#icon-coach";
+}
+
+// Pevný seznam vláken appky, v pořadí, v jakém je ukázat v panelu.
+// "Hledání cíle" mezi nimi chybí záměrně — cíle mají vlastních víc
+// vláken (jedno na cíl) a žijou ve svém vlastním mechanismu na
+// záložce Hledání cíle, ne tady v pevném seznamu.
+const FIXED_THREAD_IDS = ["volny", "modelovani", "stav", "presvedceni", "kotveni", "komunikace", "hodnoty"];
+
+function updateThreadIndicator(threadId, titleOverride) {
+  threadCurrentIcon.querySelector("use").setAttribute("href", iconForThread(threadId));
+  threadCurrentLabel.textContent = titleOverride || threadMetaFor(threadId).title;
+}
+
+function formatThreadDate(ts) {
+  if (!ts || typeof ts.toDate !== "function") return "Ještě žádná zpráva";
+  const d = ts.toDate();
+  return `${String(d.getDate()).padStart(2, "0")}.${String(d.getMonth() + 1).padStart(2, "0")}.${d.getFullYear()}`;
+}
+
+async function renderThreadPanel() {
+  threadPanel.innerHTML = '<div style="padding:0.6rem;color:var(--text-faint);font-size:0.85rem">Načítám…</div>';
+
+  const goalRow = document.createElement("button");
+  goalRow.className = "thread-panel__item";
+  goalRow.innerHTML = `
+    <span class="thread-panel__icon"><svg><use href="#icon-goals"/></svg></span>
+    <span class="thread-panel__body">
+      <div class="thread-panel__title">Hledání cíle</div>
+      <div class="thread-panel__meta">Každý rozjetý cíl má vlastní rozhovor</div>
+    </span>
+  `;
+  goalRow.addEventListener("click", () => {
+    threadPanel.style.display = "none";
+    if (window.showView) window.showView("cile");
+  });
+
+  const rows = await Promise.all(
+    FIXED_THREAD_IDS.map(async (id) => {
+      const meta = await getThreadMeta(id);
+      return { id, meta };
+    })
+  );
+  threadPanel.innerHTML = "";
+  threadPanel.appendChild(goalRow);
+  rows.forEach(({ id, meta }) => {
+    const title = threadMetaFor(id).title;
+    const btn = document.createElement("button");
+    btn.className = "thread-panel__item" + (id === activeThreadId ? " is-active" : "");
+    btn.innerHTML = `
+      <span class="thread-panel__icon"><svg><use href="${iconForThread(id)}"/></svg></span>
+      <span class="thread-panel__body">
+        <div class="thread-panel__title">${title}</div>
+        <div class="thread-panel__meta">${formatThreadDate(meta && meta.lastMessageAt)}</div>
+      </span>
+    `;
+    btn.addEventListener("click", async () => {
+      threadPanel.style.display = "none";
+      if (id !== activeThreadId) {
+        await switchThread(id);
+      }
+      updateThreadIndicator(id);
+    });
+    threadPanel.appendChild(btn);
+  });
+}
+
+threadListToggle.addEventListener("click", () => {
+  const willOpen = threadPanel.style.display === "none";
+  threadPanel.style.display = willOpen ? "" : "none";
+  if (willOpen) renderThreadPanel();
+});
+
+threadCurrentBtn.addEventListener("click", () => {
+  threadListToggle.click();
+});
 
 // Přepne appku na jiné vlákno: vyprázdní chat na obrazovce, nahraje
 // uloženou historii TOHOTO vlákna a nastaví ho jako aktivní pro další
@@ -98,6 +192,7 @@ function threadMetaFor(threadId) {
 // nemaže (je už prázdný) a jen se rovnou naplní.
 async function switchThread(threadId, { fromInit = false } = {}) {
   activeThreadId = threadId;
+  updateThreadIndicator(threadId);
   if (!fromInit) {
     messagesEl.innerHTML = "";
   }
@@ -364,6 +459,20 @@ async function saveSummaryAsGoal(title, desc, cardEl) {
   }
 }
 
+// Appka dřív poslala instrukci pro [[KROK n]]/[[SHRNUTI]]/[[ZEBRICEK]] jen
+// jednou, v úvodní zprávě. V praxi se ukázalo (Hodnoty flow), že si to
+// model po pár tazích přestane hlídat, i když instrukce zůstává v historii.
+// Proto appka teď při KAŽDÉM dalším tahu v krokovaném režimu přibalí
+// krátkou skrytou připomínku — neviditelnou v bublině uživatele, jen
+// v datech, co jdou na Claude API.
+function guidedReminderSuffix() {
+  if (!guidedMode) return "";
+  if (valueDiscoveryActive) {
+    return "\n\n(Připomínka pro tebe, nepiš ji uživateli: nezapomeň na úplný začátek téhle odpovědi napsat značku [[KROK n]] (n = 1 až 6), nebo pokud je čas na finální žebříček, [[ZEBRICEK]] přesně v domluveném formátu.)";
+  }
+  return "\n\n(Připomínka pro tebe, nepiš ji uživateli: nezapomeň na úplný začátek téhle odpovědi napsat značku [[KROK n]] (n = 1 až 12), nebo pokud je cíl už jasně zformulovaný, [[SHRNUTI]] přesně v domluveném formátu.)";
+}
+
 /**
  * Odešle text Worker proxy a zpracuje odpověď.
  * @param {string} apiText - text, co jde do historie pro Claude API
@@ -384,7 +493,7 @@ async function callCoach(apiText, showUserBubble) {
     scrollInputIntoView();
     if (!guidedMode) persistGeneralMessage("user", apiText);
   }
-  history.push({ role: "user", content: apiText });
+  history.push({ role: "user", content: apiText + guidedReminderSuffix() });
 
   const typingBubble = addTypingBubble(container);
   if (showUserBubble) scrollInputIntoView();
@@ -555,6 +664,8 @@ function setActiveGoal(goal) {
   goalBannerTitle.textContent = goal.title;
   goalBanner.style.display = "";
   goalSaveBtn.style.display = "";
+  threadBar.style.display = "none";
+  threadPanel.style.display = "none";
 }
 
 function setDiscoveryMode(mode) {
@@ -568,6 +679,8 @@ function setDiscoveryMode(mode) {
   // souhrnná karta na konci má vlastní tlačítko na uložení — tlačítko
   // "Uložit rozhovor k cíli" tady nedává smysl, dokud cíl ještě neexistuje
   goalSaveBtn.style.display = "none";
+  threadBar.style.display = "none";
+  threadPanel.style.display = "none";
 }
 
 function setValueDiscoveryMode() {
@@ -581,6 +694,8 @@ function setValueDiscoveryMode() {
   // stejně jako u objevovacího rozhovoru cíle — uložení jede přes vlastní
   // tlačítko na souhrnné kartě na konci, ne přes tohle
   goalSaveBtn.style.display = "none";
+  threadBar.style.display = "none";
+  threadPanel.style.display = "none";
 }
 
 function clearActiveGoal() {
@@ -592,6 +707,8 @@ function clearActiveGoal() {
   goalSaveBtn.style.display = "";
   collapseStepLive();
   hideStepProgress();
+  threadBar.style.display = "";
+  updateThreadIndicator(activeThreadId);
 }
 
 goalExitBtn.addEventListener("click", () => {

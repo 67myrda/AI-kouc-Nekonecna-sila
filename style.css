@@ -440,6 +440,88 @@ select.text-input{ appearance: none; }
 
 .badge--done{ background: var(--gold-dim); color: var(--gold); }
 
+.thread-bar{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+
+.thread-current{
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.4rem 0.9rem 0.4rem 0.5rem;
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  min-width: 0;
+}
+
+.thread-current__icon{
+  flex: none;
+  width: 26px; height: 26px;
+  border-radius: 999px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--violet-dim);
+  color: var(--violet);
+}
+
+.thread-current__icon svg{ width: 14px; height: 14px; }
+
+.thread-current__label{
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.thread-panel{
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.thread-panel__item{
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  width: 100%;
+  text-align: left;
+  padding: 0.6rem 0.6rem;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.thread-panel__item:active,
+.thread-panel__item:hover{ background: rgba(255,255,255,0.05); }
+
+.thread-panel__item.is-active{ background: rgba(255,255,255,0.08); }
+
+.thread-panel__icon{
+  flex: none;
+  width: 30px; height: 30px;
+  border-radius: 999px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--violet-dim);
+  color: var(--violet);
+}
+
+.thread-panel__icon svg{ width: 16px; height: 16px; }
+
+.thread-panel__body{ flex: 1; min-width: 0; }
+
+.thread-panel__title{ font-size: 0.9rem; }
+
+.thread-panel__meta{ font-size: 0.72rem; color: var(--text-faint); margin-top: 0.1rem; }
+
 .value-profile__date{ font-size: 0.75rem; color: var(--text-faint); font-weight: 400; }
 
 .value-row{

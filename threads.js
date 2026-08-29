@@ -102,6 +102,19 @@ export async function addThreadMessage(threadId, role, text, meta) {
   }
 }
 
+/** Vrátí metadata vlákna (title, lastMessageAt) bez zpráv, nebo null. Pro seznam vláken. */
+export async function getThreadMeta(threadId) {
+  const user = auth.currentUser;
+  if (!user) return null;
+  try {
+    const snap = await getDoc(doc(db, "users", user.uid, "threads", threadId));
+    return snap.exists() ? snap.data() : null;
+  } catch (err) {
+    console.error("Načtení metadat vlákna selhalo (" + threadId + "):", err);
+    return null;
+  }
+}
+
 /** Uloží/aktualizuje průběžné shrnutí vlákna (kontinuita při návratu). */
 export async function updateThreadSummary(threadId, summary) {
   const user = auth.currentUser;
