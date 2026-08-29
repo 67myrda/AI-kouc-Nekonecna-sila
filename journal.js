@@ -26,6 +26,7 @@ const ICONS = {
   kouc: "#icon-coach",
   cile: "#icon-goals",
   vault: "#icon-capsule",
+  hodnoty: "#icon-values",
 };
 
 /**

@@ -18,6 +18,7 @@ import {
 import { markTodayActivity } from "./progress.js";
 import { writeJournalEntry } from "./journal.js";
 import { PILIR_TITLES, ensureThread, loadThreadMessages, addThreadMessage, updateThreadSummary } from "./threads.js";
+import { saveValueProfile } from "./values-coach.js";
 
 const WORKER_URL = "https://ai-kouc-proxy.67myrda.workers.dev/";
 const db = getFirestore(app);
@@ -43,8 +44,10 @@ let history = [];
 let transcriptLog = [];
 let activeGoal = null; // { id, title, description } — vedení existujícího cíle
 let discoveryInfo = null; // { mode: 1|2 } — objevovací rozhovor bez existujícího cíle
-let guidedMode = false; // true, pokud jede krokované vedení (activeGoal nebo discoveryInfo)
+let valueDiscoveryActive = false; // true během vedeného objevování žebříčku hodnot
+let guidedMode = false; // true, pokud jede krokované vedení (activeGoal, discoveryInfo nebo valueDiscoveryActive)
 let currentStep = 0;
+let stepTotal = 12; // proměnlivé podle typu vedeného rozhovoru (cíl = 12, hodnoty = 6)
 let stepLiveEl = null; // aktuálně "otevřený" (neshrnovaný) kontejner kroku
 let stepLiveLabel = "";
 let sending = false;
@@ -67,6 +70,9 @@ function historyForApi() {
 // appka podle toho staví progress bar, sbalování a souhrnnou kartu cíle
 const MARKER_INSTRUCTIONS =
   "\n\nDŮLEŽITÉ FORMÁTOVÁNÍ (nečti nahlas, jen dodržuj): u každé zprávy, kde pokládáš novou otázku k dalšímu z 12 kroků, napiš na úplný začátek zprávy na samostatný řádek značku ve tvaru [[KROK n]] (n = číslo kroku 1 až 12), a teprve pod ní běžný text. Až jsou splněny všechny kroky a cíl je jasně zformulovaný, napiš na začátek zprávy značku [[SHRNUTI]] a pod ní na samostatné řádky:\nNÁZEV: <stručný název cíle, max 10 slov>\nPOPIS: <1-2 věty shrnující cíl a cestu k němu>\na pak volně navazující vřelé shrnutí celé cesty.";
+
+const MARKER_INSTRUCTIONS_HODNOTY =
+  "\n\nDŮLEŽITÉ FORMÁTOVÁNÍ (nečti nahlas, jen dodržuj): u každé zprávy s novou otázkou napiš na úplný začátek zprávy na samostatný řádek značku [[KROK n]] (n = číslo kroku 1 až 6), a teprve pod ní běžný text. Až rozhovor dospěje k jasnému osobnímu žebříčku (typicky 5 až 8 hodnot), napiš na začátek zprávy značku [[ZEBRICEK]] a pod ní, každou na samostatný řádek, ve VÝHRADNĚ tomto formátu (nic nepřidávej, nepiš odrážky ani jiné znaky navíc):\nPOŘADÍ. NÁZEV | k nebo od | PRAVIDLO\nPříklad řádku: 1. Rodina | k | Cítím, že ji žiju, když trávím nedělní večer s blízkými bez telefonu.\n\"k\" znamená hodnotu, ke které se člověk vědomě přibližuje. \"od\" znamená to, čemu se vyhýbá (obava, nechtěný stav) a co může nevědomky řídit chování víc, než si člověk myslí. Pod seznamem napiš krátké vřelé shrnutí celého žebříčku.";
 
 function escapeHtmlLocal(str) {
   const div = document.createElement("div");
@@ -156,9 +162,9 @@ inputEl.addEventListener("focus", () => {
 /* ==================== KROKOVÝ PROGRESS BAR (1–12) ==================== */
 
 function ensureStepDots() {
-  if (stepProgressDotsEl.childElementCount === 12) return;
+  if (stepProgressDotsEl.childElementCount === stepTotal) return;
   stepProgressDotsEl.innerHTML = "";
-  for (let i = 1; i <= 12; i++) {
+  for (let i = 1; i <= stepTotal; i++) {
     const dot = document.createElement("span");
     dot.className = "step-progress__dot";
     dot.dataset.step = String(i);
@@ -169,7 +175,7 @@ function ensureStepDots() {
 function updateStepProgressUI(step) {
   ensureStepDots();
   stepProgressEl.style.display = "";
-  stepProgressLabelEl.textContent = `Krok ${step} / 12`;
+  stepProgressLabelEl.textContent = `Krok ${step} / ${stepTotal}`;
   Array.from(stepProgressDotsEl.children).forEach((dot) => {
     const n = Number(dot.dataset.step);
     dot.classList.toggle("is-done", n < step);
@@ -228,6 +234,35 @@ function parseCoachReply(rawText) {
       desc: descMatch ? descMatch[1].trim() : "",
     };
   }
+  const zebricekMatch = rawText.match(/^\s*\[\[ZEBRICEK\]\]\s*/i);
+  if (zebricekMatch) {
+    const rest = rawText.slice(zebricekMatch[0].length);
+    const lines = rest.split("\n").map((l) => l.trim()).filter(Boolean);
+    const values = [];
+    const introLines = [];
+    // očekávaný formát řádku: "1. Rodina | k | Pravidlo..."
+    const lineRe = /^(\d{1,2})\.\s*([^|]+)\|\s*(k|od)\s*\|\s*(.+)$/i;
+    lines.forEach((line) => {
+      const m = line.match(lineRe);
+      if (m) {
+        values.push({
+          rank: parseInt(m[1], 10),
+          label: m[2].trim(),
+          direction: m[3].toLowerCase(),
+          rule: m[4].trim(),
+        });
+      } else {
+        introLines.push(line);
+      }
+    });
+    if (values.length > 0) {
+      return { type: "zebricek", displayText: introLines.join("\n"), values };
+    }
+    // značka tam byla, ale appka nedokázala rozparsovat ani jeden řádek —
+    // radši to ukázat jako obyčejný text s upozorněním, než tvrdit, že
+    // žebříček vznikl, a přitom ho nemít
+    return { type: "plain", displayText: rawText };
+  }
   const stepMatch = rawText.match(/^\s*\[\[KROK\s*(\d{1,2})\]\]\s*/i);
   if (stepMatch) {
     return {
@@ -252,6 +287,40 @@ function showGoalSummaryCard(title, desc) {
   messagesEl.scrollTop = messagesEl.scrollHeight;
   card.querySelector("#goal-summary-save-btn").addEventListener("click", () => {
     saveSummaryAsGoal(title, desc, card);
+  });
+}
+
+function showValueProfileCard(values) {
+  const card = document.createElement("div");
+  card.className = "goal-summary-card";
+  const rows = values
+    .map((v) => {
+      const dirLabel = v.direction === "od" ? "od čeho" : "k čemu";
+      return `<div style="margin:0.5rem 0;padding-bottom:0.5rem;border-bottom:1px solid rgba(255,255,255,0.08)">
+        <strong>${v.rank}. ${escapeHtmlLocal(v.label)}</strong> <span style="opacity:.7">(${dirLabel})</span>
+        ${v.rule ? `<div style="font-size:0.85rem;opacity:.85;margin-top:0.2rem">${escapeHtmlLocal(v.rule)}</div>` : ""}
+      </div>`;
+    })
+    .join("");
+  card.innerHTML = `
+    <span class="goal-summary-card__eyebrow">Tvůj žebříček hodnot</span>
+    ${rows}
+    <button class="btn btn--primary btn--sm" id="value-profile-save-btn">Uložit žebříček</button>
+  `;
+  messagesEl.appendChild(card);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+  card.querySelector("#value-profile-save-btn").addEventListener("click", async (e) => {
+    const btn = e.target;
+    btn.disabled = true;
+    try {
+      await saveValueProfile(values);
+      writeJournalEntry("hodnoty", "Nový žebříček hodnot");
+      btn.textContent = "Uloženo ✓";
+    } catch (err) {
+      console.error("Uložení žebříčku hodnot selhalo:", err);
+      alert("Uložení se nezdařilo. Zkus to prosím znovu.");
+      btn.disabled = false;
+    }
   });
 }
 
@@ -347,6 +416,10 @@ async function callCoach(apiText, showUserBubble) {
         addBubble("coach", parsed.displayText, stepLiveEl || messagesEl);
         collapseStepLive();
         showGoalSummaryCard(parsed.title, parsed.desc);
+      } else if (parsed.type === "zebricek") {
+        addBubble("coach", parsed.displayText, stepLiveEl || messagesEl);
+        collapseStepLive();
+        showValueProfileCard(parsed.values);
       } else if (parsed.type === "step") {
         if (parsed.step !== currentStep || !stepLiveEl) {
           openStepLive(parsed.step, parsed.displayText);
@@ -476,7 +549,9 @@ function resetGuidedChat() {
 function setActiveGoal(goal) {
   activeGoal = goal;
   discoveryInfo = null;
+  valueDiscoveryActive = false;
   guidedMode = true;
+  stepTotal = 12;
   goalBannerTitle.textContent = goal.title;
   goalBanner.style.display = "";
   goalSaveBtn.style.display = "";
@@ -485,7 +560,9 @@ function setActiveGoal(goal) {
 function setDiscoveryMode(mode) {
   activeGoal = null;
   discoveryInfo = { mode };
+  valueDiscoveryActive = false;
   guidedMode = true;
+  stepTotal = 12;
   goalBannerTitle.textContent = mode === 1 ? "Cíl, po kterém toužím" : "Cíl, který hledám";
   goalBanner.style.display = "";
   // souhrnná karta na konci má vlastní tlačítko na uložení — tlačítko
@@ -493,9 +570,23 @@ function setDiscoveryMode(mode) {
   goalSaveBtn.style.display = "none";
 }
 
+function setValueDiscoveryMode() {
+  activeGoal = null;
+  discoveryInfo = null;
+  valueDiscoveryActive = true;
+  guidedMode = true;
+  stepTotal = 6;
+  goalBannerTitle.textContent = "Objevení hodnot";
+  goalBanner.style.display = "";
+  // stejně jako u objevovacího rozhovoru cíle — uložení jede přes vlastní
+  // tlačítko na souhrnné kartě na konci, ne přes tohle
+  goalSaveBtn.style.display = "none";
+}
+
 function clearActiveGoal() {
   activeGoal = null;
   discoveryInfo = null;
+  valueDiscoveryActive = false;
   guidedMode = false;
   goalBanner.style.display = "none";
   goalSaveBtn.style.display = "";
@@ -607,6 +698,22 @@ window.addEventListener("cile-objevovani-start", (e) => {
       `Prováděj mě jedním krokem po druhém — polož mi vždy jen jednu otázku a počkej na mou odpověď, než přejdeš na další krok.`;
   }
   primingText += MARKER_INSTRUCTIONS;
+
+  callCoach(primingText, false);
+});
+
+/* ==================== HODNOTY — VEDENÉ OBJEVENÍ ŽEBŘÍČKU ==================== */
+
+window.addEventListener("hodnoty-coach-start", () => {
+  resetGuidedChat();
+  setValueDiscoveryMode();
+
+  const primingText =
+    "Chci s tebou projít objevení mého osobního žebříčku hodnot podle principů z knihy Nekonečná síla. " +
+    "Veď mě rozhovorem, který pomůže najít, co je pro mě opravdu důležité — jak hodnoty, ke kterým se vědomě přibližuji (\"k čemu\"), tak i to, čemu se naopak vyhýbám (\"od čeho\") a co může nevědomky řídit moje chování, aniž bych si to uvědomoval/a. " +
+    "U každé hodnoty, na kterou přijdeme, se mě zeptej, jaké konkrétní PRAVIDLO by muselo nastat, abych cítil/a, že ji doopravdy žiju — lidé mají často nevědomky nastavená příliš přísná pravidla, a to je časem stojí spokojenost. " +
+    "Prováděj mě jedním krokem po druhém, polož mi vždy jen jednu otázku a počkej na odpověď, než přejdeš na další. Na konci sestav krátký osobní žebříček." +
+    MARKER_INSTRUCTIONS_HODNOTY;
 
   callCoach(primingText, false);
 });

@@ -440,6 +440,37 @@ select.text-input{ appearance: none; }
 
 .badge--done{ background: var(--gold-dim); color: var(--gold); }
 
+.value-profile__date{ font-size: 0.75rem; color: var(--text-faint); font-weight: 400; }
+
+.value-row{
+  display: flex;
+  gap: 0.7rem;
+  align-items: flex-start;
+  padding: 0.7rem 0;
+}
+
+.value-row + .value-row{ border-top: 1px solid var(--border); }
+
+.value-row__rank{
+  flex: none;
+  width: 1.6rem;
+  font-family: var(--font-mono);
+  color: var(--text-faint);
+  font-size: 0.85rem;
+  padding-top: 0.1rem;
+}
+
+.value-row__body{ flex: 1; min-width: 0; }
+
+.value-row__head{ display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+
+.value-row__label{ font-size: 1rem; color: var(--text-primary); }
+
+.value-row__rule{ font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem; }
+
+.badge--k{ background: var(--gold-dim); color: var(--gold); }
+.badge--od{ background: var(--flame-dim); color: var(--flame); }
+
 .btn{
   display: inline-flex;
   align-items: center;
@@ -1220,6 +1251,7 @@ select.text-input{ appearance: none; }
 .journal-entry[data-type="koncept"] .journal-entry__icon{ background: var(--flame-dim); color: var(--flame); }
 .journal-entry[data-type="cile"] .journal-entry__icon{ background: var(--gold-dim); color: var(--gold); }
 .journal-entry[data-type="vault"] .journal-entry__icon{ background: var(--violet-dim); color: var(--violet); }
+.journal-entry[data-type="hodnoty"] .journal-entry__icon{ background: var(--gold-dim); color: var(--gold); }
 
 .journal-entry__body{ flex: 1; min-width: 0; }
 
