@@ -18,7 +18,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 import { markTodayActivity } from "./progress.js";
-import { ensureThread } from "./threads.js";
+import { ensureThread, getThreadMeta } from "./threads.js";
 
 const db = getFirestore(app);
 
@@ -41,6 +41,24 @@ const statGoalsEl = document.getElementById("stat-goals");
 
 const discoveryMode1Btn = document.getElementById("discovery-start-mode1");
 const discoveryMode2Btn = document.getElementById("discovery-start-mode2");
+const discoveryResumeCard = document.getElementById("cile-discovery-resume");
+const discoveryResumeBtn = document.getElementById("cile-discovery-resume-btn");
+
+async function refreshDiscoveryResumeState() {
+  if (!discoveryResumeCard) return;
+  const meta = await getThreadMeta("cil-objevovani");
+  discoveryResumeCard.style.display = meta && meta.lastMessageAt ? "" : "none";
+}
+
+document.querySelectorAll('button[data-view="cile"]').forEach((btn) => {
+  btn.addEventListener("click", () => {
+    if (auth.currentUser) refreshDiscoveryResumeState();
+  });
+});
+
+discoveryResumeBtn?.addEventListener("click", () => {
+  window.dispatchEvent(new CustomEvent("cile-objevovani-resume"));
+});
 
 if (discoveryMode1Btn) {
   discoveryMode1Btn.addEventListener("click", () => {

@@ -22,6 +22,7 @@ import {
   orderBy,
   limit,
   getDocs,
+  deleteDoc,
   serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
@@ -112,6 +113,19 @@ export async function getThreadMeta(threadId) {
   } catch (err) {
     console.error("Načtení metadat vlákna selhalo (" + threadId + "):", err);
     return null;
+  }
+}
+
+/** Vyprázdní zprávy vlákna (např. rozjetá "cil-objevovani" draft po úspěšném uložení jako cíl). Dokument vlákna samotný zůstává. */
+export async function clearThreadMessages(threadId) {
+  const user = auth.currentUser;
+  if (!user) return;
+  try {
+    const snap = await getDocs(collection(db, "users", user.uid, "threads", threadId, "messages"));
+    await Promise.all(snap.docs.map((d) => deleteDoc(d.ref)));
+    await setDoc(doc(db, "users", user.uid, "threads", threadId), { lastMessageAt: null }, { merge: true });
+  } catch (err) {
+    console.error("Vyprázdnění vlákna selhalo (" + threadId + "):", err);
   }
 }
 

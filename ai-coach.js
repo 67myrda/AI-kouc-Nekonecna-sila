@@ -17,7 +17,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 import { markTodayActivity } from "./progress.js";
 import { writeJournalEntry } from "./journal.js";
-import { PILIR_TITLES, ensureThread, loadThreadMessages, addThreadMessage, updateThreadSummary, getThreadMeta } from "./threads.js";
+import { PILIR_TITLES, ensureThread, loadThreadMessages, addThreadMessage, updateThreadSummary, getThreadMeta, clearThreadMessages } from "./threads.js";
 import { saveValueProfile } from "./values-coach.js";
 
 const WORKER_URL = "https://ai-kouc-proxy.67myrda.workers.dev/";
@@ -85,12 +85,6 @@ function escapeHtmlLocal(str) {
   const div = document.createElement("div");
   div.textContent = str || "";
   return div.innerHTML;
-}
-
-// uložení jedné zprávy do právě aktivního vlákna (Volný rozhovor / Pilíř) —
-// krokovaně vedené rozhovory (cíl / objevování) se ukládají zvlášť, tlačítkem
-async function persistGeneralMessage(role, text) {
-  await addThreadMessage(activeThreadId, role, text, threadMetaFor(activeThreadId));
 }
 
 function threadMetaFor(threadId) {
@@ -190,12 +184,11 @@ threadCurrentBtn.addEventListener("click", () => {
 // uloženou historii TOHOTO vlákna a nastaví ho jako aktivní pro další
 // zprávy. Když appku teprve otevíráš (fromInit=true), messagesEl se
 // nemaže (je už prázdný) a jen se rovnou naplní.
-async function switchThread(threadId, { fromInit = false } = {}) {
-  activeThreadId = threadId;
-  updateThreadIndicator(threadId);
-  if (!fromInit) {
-    messagesEl.innerHTML = "";
-  }
+// Sdílené jádro nahrání zpráv vlákna do obrazovky + history — používá
+// switchThread (volná vlákna) i obnovení přerušeného krokovaného rozhovoru
+// (Hledání cíle / Hodnoty), viz níže.
+async function loadMessagesIntoChat(threadId) {
+  messagesEl.innerHTML = "";
   history = [];
   const msgs = await loadThreadMessages(threadId);
   msgs.forEach((m) => {
@@ -204,6 +197,12 @@ async function switchThread(threadId, { fromInit = false } = {}) {
     history.push({ role: m.role === "user" ? "user" : "assistant", content: m.text });
   });
   return msgs.length;
+}
+
+async function switchThread(threadId, { fromInit = false } = {}) {
+  activeThreadId = threadId;
+  updateThreadIndicator(threadId);
+  return loadMessagesIntoChat(threadId);
 }
 
 function addBubble(role, text, container) {
@@ -444,10 +443,11 @@ async function saveSummaryAsGoal(title, desc, cardEl) {
         outcomeThinkingTranscript: transcriptText,
         outcomeThinkingUpdatedAt: serverTimestamp(),
         createdAt: serverTimestamp(),
-        discoveredVia: discoveryInfo ? `mode${discoveryInfo.mode}` : null,
+        discoveredVia: discoveryInfo && discoveryInfo.mode ? `mode${discoveryInfo.mode}` : "resumed",
       });
       await ensureThread(goalRef.id, { type: "cil", goalId: goalRef.id, title: title || "Nový cíl" });
       await updateThreadSummary(goalRef.id, desc || "");
+      await clearThreadMessages("cil-objevovani");
       markTodayActivity("cile");
       writeJournalEntry("cile", `Nový cíl: ${title || "Nový cíl"}`);
     }
@@ -479,6 +479,31 @@ function guidedReminderSuffix() {
  * @param {boolean} showUserBubble - jestli se má text zobrazit jako bublina uživatele
  *   (false pro skryté instrukce typu "nastartuj vedení cíle X")
  */
+// Kam se má ukládat aktuální krokovaný rozhovor (existující cíl / rozjeté
+// hledání cíle / objevování hodnot) — každý má vlastní vlákno, ať appka
+// dokáže po přerušení nabídnout návaznost, ne jen tichou ztrátu rozhovoru.
+function guidedThreadId() {
+  if (activeGoal && activeGoal.id) return activeGoal.id;
+  if (discoveryInfo) return "cil-objevovani";
+  if (valueDiscoveryActive) return "hodnoty";
+  return null;
+}
+
+function guidedThreadMeta(threadId) {
+  if (activeGoal && threadId === activeGoal.id) {
+    return { type: "cil", goalId: activeGoal.id, title: activeGoal.title };
+  }
+  if (threadId === "cil-objevovani") return { type: "cil-draft", title: "Hledání cíle (rozjeté)" };
+  if (threadId === "hodnoty") return { type: "hodnoty", title: "Hodnoty" };
+  return {};
+}
+
+async function persistTurnMessage(role, text) {
+  const targetId = guidedMode ? guidedThreadId() : activeThreadId;
+  if (!targetId) return;
+  await addThreadMessage(targetId, role, text, guidedMode ? guidedThreadMeta(targetId) : threadMetaFor(targetId));
+}
+
 async function callCoach(apiText, showUserBubble) {
   if (sending) return;
   sending = true;
@@ -491,7 +516,7 @@ async function callCoach(apiText, showUserBubble) {
     addBubble("user", apiText, container);
     transcriptLog.push({ who: "Ty", text: apiText });
     scrollInputIntoView();
-    if (!guidedMode) persistGeneralMessage("user", apiText);
+    persistTurnMessage("user", apiText);
   }
   history.push({ role: "user", content: apiText + guidedReminderSuffix() });
 
@@ -519,8 +544,10 @@ async function callCoach(apiText, showUserBubble) {
     history.push({ role: "assistant", content: rawReply });
     transcriptLog.push({ who: "Kouč", text: rawReply });
 
+    let persistedCoachText = rawReply;
     if (guidedMode) {
       const parsed = parseCoachReply(rawReply);
+      persistedCoachText = parsed.displayText;
       if (parsed.type === "summary") {
         addBubble("coach", parsed.displayText, stepLiveEl || messagesEl);
         collapseStepLive();
@@ -543,7 +570,7 @@ async function callCoach(apiText, showUserBubble) {
     }
 
     if (showUserBubble) scrollInputIntoView();
-    if (!guidedMode) persistGeneralMessage("coach", rawReply);
+    persistTurnMessage("coach", persistedCoachText);
     if (showUserBubble) markTodayActivity("kouc");
   } catch (err) {
     typingBubble.remove();
@@ -831,6 +858,51 @@ window.addEventListener("hodnoty-coach-start", () => {
     "U každé hodnoty, na kterou přijdeme, se mě zeptej, jaké konkrétní PRAVIDLO by muselo nastat, abych cítil/a, že ji doopravdy žiju — lidé mají často nevědomky nastavená příliš přísná pravidla, a to je časem stojí spokojenost. " +
     "Prováděj mě jedním krokem po druhém, polož mi vždy jen jednu otázku a počkej na odpověď, než přejdeš na další. Na konci sestav krátký osobní žebříček." +
     MARKER_INSTRUCTIONS_HODNOTY;
+
+  callCoach(primingText, false);
+});
+
+/* ==================== OBNOVENÍ PŘERUŠENÉHO KROKOVANÉHO ROZHOVORU ==================== */
+
+window.addEventListener("hodnoty-coach-resume", async () => {
+  switchToCoachView();
+  transcriptLog = [];
+  currentStep = 0;
+  stepLiveEl = null;
+  stepLiveLabel = "";
+  hideStepProgress();
+  setValueDiscoveryMode();
+
+  await loadMessagesIntoChat("hodnoty");
+  history.forEach((h) => {
+    transcriptLog.push({ who: h.role === "user" ? "Ty" : "Kouč", text: h.content });
+  });
+
+  const primingText =
+    "Pokračujeme v objevování mého žebříčku hodnot tam, kde jsme přestali. Krátce to shrň a naväž další otázkou." +
+    MARKER_INSTRUCTIONS_HODNOTY;
+
+  callCoach(primingText, false);
+});
+
+window.addEventListener("cile-objevovani-resume", async () => {
+  switchToCoachView();
+  transcriptLog = [];
+  currentStep = 0;
+  stepLiveEl = null;
+  stepLiveLabel = "";
+  hideStepProgress();
+  setDiscoveryMode(null);
+  goalBannerTitle.textContent = "Hledání cíle (pokračování)";
+
+  await loadMessagesIntoChat("cil-objevovani");
+  history.forEach((h) => {
+    transcriptLog.push({ who: h.role === "user" ? "Ty" : "Kouč", text: h.content });
+  });
+
+  const primingText =
+    "Pokračujeme v hledání mého cíle metodou 12 kroků Outcome Thinking tam, kde jsme přestali. Krátce to shrň a naväž další otázkou." +
+    MARKER_INSTRUCTIONS;
 
   callCoach(primingText, false);
 });
