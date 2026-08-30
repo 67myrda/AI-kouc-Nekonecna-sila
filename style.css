@@ -569,6 +569,23 @@ select.text-input{ appearance: none; }
 
 .thread-carousel-dots span.is-active{ background: var(--gradient-signature); width: 14px; }
 
+.thread-float-btn{
+  position: fixed;
+  right: 1.1rem;
+  bottom: 6rem;
+  width: 52px; height: 52px;
+  border-radius: 999px;
+  border: none;
+  background: var(--gradient-signature);
+  color: var(--bg);
+  box-shadow: 0 10px 26px rgba(0,0,0,0.5);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 40;
+  cursor: pointer;
+}
+
+.thread-float-btn svg{ width: 22px; height: 22px; }
+
 .value-profile__date{ font-size: 0.75rem; color: var(--text-faint); font-weight: 400; }
 
 .value-row{
@@ -1503,6 +1520,16 @@ select.text-input{ appearance: none; }
   background: var(--gold-dim);
   border: 1px solid rgba(255,201,74,0.35);
   color: var(--cream);
+  font-size: 0.78rem;
+  font-style: italic;
+  padding: 0.55rem 0.8rem;
+}
+
+.chat-bubble--hint{
+  max-width: 92%;
+  background: var(--violet-dim);
+  border: 1px solid rgba(124,107,240,0.3);
+  color: var(--text-muted);
   font-size: 0.78rem;
   font-style: italic;
   padding: 0.55rem 0.8rem;

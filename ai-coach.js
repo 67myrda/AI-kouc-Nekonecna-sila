@@ -37,6 +37,8 @@ const threadCurrentIcon = document.getElementById("thread-current-icon");
 const threadCurrentLabel = document.getElementById("thread-current-label");
 const threadListToggle = document.getElementById("thread-list-toggle");
 const threadPanel = document.getElementById("thread-panel");
+const threadFloatBtn = document.getElementById("thread-float-btn");
+const threadFloatIcon = document.getElementById("thread-float-icon");
 const threadBar = document.querySelector(".thread-bar");
 
 const stepProgressEl = document.getElementById("step-progress");
@@ -122,6 +124,7 @@ const FIXED_THREAD_IDS = ["volny", "modelovani", "stav", "presvedceni", "kotveni
 function updateThreadIndicator(threadId, titleOverride) {
   threadCurrentIcon.querySelector("use").setAttribute("href", iconForThread(threadId));
   threadCurrentLabel.textContent = titleOverride || threadMetaFor(threadId).title;
+  threadFloatIcon.querySelector("use").setAttribute("href", iconForThread(threadId));
 }
 
 function formatThreadDate(ts) {
@@ -160,7 +163,7 @@ async function renderThreadPanel() {
         id,
         title: threadMetaFor(id).title,
         meta: formatThreadDate(meta && meta.lastMessageAt),
-        summary: (meta && meta.summary) || "",
+        summary: (meta && meta.summary) || (meta && meta.lastMessageAt ? "" : "Zatím nezačato — klikni a pojďme na to."),
         icon: iconForThread(id),
       };
     })
@@ -232,7 +235,7 @@ function renderCarousel() {
 }
 
 async function openCarouselItem(item) {
-  threadPanel.style.display = "none";
+  closeThreadPanel();
   if (item.id === "__cile__") {
     if (window.showView) window.showView("cile");
     return;
@@ -281,11 +284,24 @@ carouselWrap.addEventListener("pointerup", (e) => {
   carouselIsDragging = false;
 });
 
+function openThreadPanel() {
+  threadPanel.style.display = "";
+  threadFloatBtn.style.display = "none";
+  renderThreadPanel();
+}
+
+function closeThreadPanel() {
+  threadPanel.style.display = "none";
+  if (!guidedMode) threadFloatBtn.style.display = "flex";
+}
+
 threadListToggle.addEventListener("click", () => {
   const willOpen = threadPanel.style.display === "none";
-  threadPanel.style.display = willOpen ? "" : "none";
-  if (willOpen) renderThreadPanel();
+  if (willOpen) openThreadPanel();
+  else closeThreadPanel();
 });
+
+threadFloatBtn.addEventListener("click", openThreadPanel);
 
 threadCurrentBtn.addEventListener("click", () => {
   threadListToggle.click();
@@ -339,6 +355,15 @@ function addStepNotice(text) {
   container.appendChild(notice);
   messagesEl.scrollTop = messagesEl.scrollHeight;
   return notice;
+}
+
+function addHint(text) {
+  const hint = document.createElement("div");
+  hint.className = "chat-bubble chat-bubble--hint";
+  hint.textContent = text;
+  messagesEl.appendChild(hint);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+  return hint;
 }
 
 function addTypingBubble(container) {
@@ -714,8 +739,9 @@ inputEl.addEventListener("keydown", (e) => {
 // téhle logiky nezasahujeme, to má svůj vlastní mechanismus opuštění.
 document.querySelectorAll('button[data-view="kouc"]').forEach((btn) => {
   btn.addEventListener("click", () => {
-    if (!guidedMode && activeThreadId !== "volny") {
-      switchThread("volny");
+    if (!guidedMode) {
+      if (activeThreadId !== "volny") switchThread("volny");
+      openThreadPanel();
     }
   });
 });
@@ -754,6 +780,9 @@ window.addEventListener("concept-coach-start", (e) => {
 
     messagesEl.scrollTop = messagesEl.scrollHeight;
     scrollInputIntoView();
+    if (hadHistory) {
+      addHint("💬 Chceš podrobnější shrnutí, než jen krátké navázání? Stačí napsat, kouč má celou dosavadní historii k dispozici.");
+    }
 
     const primingText = hadHistory
       ? `Vracím se k tématu „${concept.title}“ z knihy Nekonečná síla. Naväž prosím krátce na to, kde jsme skončili, a pokračuj dál — případně mi dej další praktické cvičení.`
@@ -988,6 +1017,7 @@ window.addEventListener("hodnoty-coach-resume", async () => {
   history.forEach((h) => {
     transcriptLog.push({ who: h.role === "user" ? "Ty" : "Kouč", text: h.content });
   });
+  addHint("💬 Chceš podrobnější shrnutí, než jen krátké navázání? Stačí napsat, kouč má celou dosavadní historii k dispozici.");
 
   const primingText =
     "Pokračujeme v objevování mého žebříčku hodnot tam, kde jsme přestali. Krátce to shrň a naväž další otázkou." +
@@ -1010,6 +1040,7 @@ window.addEventListener("cile-objevovani-resume", async () => {
   history.forEach((h) => {
     transcriptLog.push({ who: h.role === "user" ? "Ty" : "Kouč", text: h.content });
   });
+  addHint("💬 Chceš podrobnější shrnutí, než jen krátké navázání? Stačí napsat, kouč má celou dosavadní historii k dispozici.");
 
   const primingText =
     "Pokračujeme v hledání mého cíle metodou 12 kroků Outcome Thinking tam, kde jsme přestali. Krátce to shrň a naväž další otázkou." +

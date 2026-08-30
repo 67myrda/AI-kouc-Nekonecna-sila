@@ -246,7 +246,7 @@
           <span class="thread-current__icon"><svg id="thread-current-icon"><use href="#icon-coach"/></svg></span>
           <span class="thread-current__label" id="thread-current-label">Volný rozhovor</span>
         </button>
-        <button class="btn btn--ghost btn--sm" id="thread-list-toggle">Vlákna</button>
+        <button class="btn btn--primary btn--sm" id="thread-list-toggle">Vlákna</button>
       </div>
 
       <div class="thread-panel" id="thread-panel" style="display:none">
@@ -280,6 +280,10 @@
           <button class="btn btn--primary" id="chat-send-btn">Odeslat</button>
         </div>
       </div>
+
+      <button class="thread-float-btn" id="thread-float-btn" style="display:none" aria-label="Vlákna">
+        <svg id="thread-float-icon"><use href="#icon-coach"/></svg>
+      </button>
     </section>
 
     <!-- ---------- HLEDÁNÍ CÍLE ---------- -->
@@ -597,7 +601,7 @@
 <script src="hero-wave.js?v=1"></script>
 <script type="module" src="firestore-data.js?v=4"></script>
 <script type="module" src="firestore-goals-values.js?v=8"></script>
-<script type="module" src="ai-coach.js?v=16"></script>
+<script type="module" src="ai-coach.js?v=17"></script>
 <script type="module" src="dnes-data.js?v=3"></script>
 <script type="module" src="time-vault.js?v=3"></script>
 </body>
