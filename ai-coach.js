@@ -100,9 +100,16 @@ const THREAD_ICON = {
   volny: "#icon-coach",
   hodnoty: "#icon-values",
 };
+const PILIR_ICON = {
+  modelovani: "#icon-pilir-modelovani",
+  stav: "#icon-pilir-stav",
+  presvedceni: "#icon-pilir-presvedceni",
+  kotveni: "#icon-pilir-kotveni",
+  komunikace: "#icon-pilir-komunikace",
+};
 function iconForThread(threadId) {
   if (THREAD_ICON[threadId]) return THREAD_ICON[threadId];
-  if (PILIR_TITLES[threadId]) return "#icon-concepts";
+  if (PILIR_ICON[threadId]) return PILIR_ICON[threadId];
   return "#icon-coach";
 }
 
@@ -123,52 +130,156 @@ function formatThreadDate(ts) {
   return `${String(d.getDate()).padStart(2, "0")}.${String(d.getMonth() + 1).padStart(2, "0")}.${d.getFullYear()}`;
 }
 
-async function renderThreadPanel() {
-  threadPanel.innerHTML = '<div style="padding:0.6rem;color:var(--text-faint);font-size:0.85rem">Načítám…</div>';
+const carouselWrap = document.getElementById("thread-carousel-wrap");
+const carouselStack = document.getElementById("thread-carousel-stack");
+const carouselDots = document.getElementById("thread-carousel-dots");
+const carouselPrevBtn = document.getElementById("thread-carousel-prev");
+const carouselNextBtn = document.getElementById("thread-carousel-next");
 
-  const goalRow = document.createElement("button");
-  goalRow.className = "thread-panel__item";
-  goalRow.innerHTML = `
-    <span class="thread-panel__icon"><svg><use href="#icon-goals"/></svg></span>
-    <span class="thread-panel__body">
-      <div class="thread-panel__title">Hledání cíle</div>
-      <div class="thread-panel__meta">Každý rozjetý cíl má vlastní rozhovor</div>
-    </span>
-  `;
-  goalRow.addEventListener("click", () => {
-    threadPanel.style.display = "none";
-    if (window.showView) window.showView("cile");
-  });
+function accentForThread(id) {
+  if (id === "hodnoty" || id === "__cile__") return "#ffc94a";
+  if (PILIR_ICON[id]) return "#ff6a4d";
+  return "#7c6bf0";
+}
+
+function hexToRgba(hex, a) {
+  const n = parseInt(hex.slice(1), 16);
+  return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
+}
+
+let carouselData = [];
+let carouselPreview = 0;
+
+async function renderThreadPanel() {
+  carouselStack.innerHTML = '<div style="padding:0.6rem;color:var(--text-faint);font-size:0.85rem;text-align:center">Načítám…</div>';
 
   const rows = await Promise.all(
     FIXED_THREAD_IDS.map(async (id) => {
       const meta = await getThreadMeta(id);
-      return { id, meta };
+      return {
+        id,
+        title: threadMetaFor(id).title,
+        meta: formatThreadDate(meta && meta.lastMessageAt),
+        summary: (meta && meta.summary) || "",
+        icon: iconForThread(id),
+      };
     })
   );
-  threadPanel.innerHTML = "";
-  threadPanel.appendChild(goalRow);
-  rows.forEach(({ id, meta }) => {
-    const title = threadMetaFor(id).title;
-    const btn = document.createElement("button");
-    btn.className = "thread-panel__item" + (id === activeThreadId ? " is-active" : "");
-    btn.innerHTML = `
-      <span class="thread-panel__icon"><svg><use href="${iconForThread(id)}"/></svg></span>
-      <span class="thread-panel__body">
-        <div class="thread-panel__title">${title}</div>
-        <div class="thread-panel__meta">${formatThreadDate(meta && meta.lastMessageAt)}</div>
-      </span>
+  rows.push({
+    id: "__cile__",
+    title: "Hledání cíle",
+    meta: "",
+    summary: "Každý rozjetý cíl má vlastní rozhovor",
+    icon: "#icon-goals",
+  });
+
+  carouselData = rows;
+  const idx = rows.findIndex((r) => r.id === activeThreadId);
+  carouselPreview = idx >= 0 ? idx : 0;
+  renderCarousel();
+}
+
+function renderCarousel() {
+  carouselStack.innerHTML = "";
+  carouselDots.innerHTML = "";
+  const total = carouselData.length;
+
+  carouselData.forEach((item, i) => {
+    let offset = i - carouselPreview;
+    if (offset > total / 2) offset -= total;
+    if (offset < -total / 2) offset += total;
+    const abs = Math.abs(offset);
+    if (abs > 2) return;
+
+    const y = offset * 82;
+    const scale = 1 - abs * 0.1;
+    const rotate = offset * -10;
+    const depthZ = -abs * 90;
+    const opacity = abs === 0 ? 1 : abs === 1 ? 0.62 : 0.24;
+    const accent = accentForThread(item.id);
+
+    const card = document.createElement("div");
+    card.className = "thread-carousel-card";
+    card.style.transform = `translate(-50%, calc(-50% + ${y}px)) translateZ(${depthZ}px) rotateX(${rotate}deg) scale(${scale})`;
+    card.style.opacity = opacity;
+    card.style.background = abs === 0
+      ? `linear-gradient(160deg, ${hexToRgba(accent, 0.22)}, var(--bg-elevated-2))`
+      : "var(--bg-elevated)";
+    card.style.borderColor = abs === 0 ? hexToRgba(accent, 0.4) : "transparent";
+    card.style.boxShadow = abs === 0
+      ? `0 0 0 1px ${hexToRgba(accent, 0.2)}, 0 10px 28px ${hexToRgba(accent, 0.28)}, 0 4px 14px rgba(0,0,0,0.5)`
+      : `0 10px 26px rgba(0,0,0,0.55)`;
+
+    card.innerHTML = `
+      <div class="thread-carousel-card__icon" style="background:${abs === 0 ? accent : hexToRgba(accent, 0.16)}; color:${abs === 0 ? "#14121f" : accent}">
+        <svg><use href="${item.icon}"/></svg>
+      </div>
+      <div class="thread-carousel-card__body">
+        <div class="thread-carousel-card__title">${item.title}</div>
+        ${item.meta ? `<div class="thread-carousel-card__meta">${item.meta}</div>` : ""}
+        ${abs === 0 && item.summary ? `<div class="thread-carousel-card__summary">${item.summary}</div>` : ""}
+      </div>
     `;
-    btn.addEventListener("click", async () => {
-      threadPanel.style.display = "none";
-      if (id !== activeThreadId) {
-        await switchThread(id);
-      }
-      updateThreadIndicator(id);
-    });
-    threadPanel.appendChild(btn);
+    card.addEventListener("click", () => openCarouselItem(item));
+    carouselStack.appendChild(card);
+  });
+
+  carouselData.forEach((_, i) => {
+    const dot = document.createElement("span");
+    if (i === carouselPreview) dot.className = "is-active";
+    carouselDots.appendChild(dot);
   });
 }
+
+async function openCarouselItem(item) {
+  threadPanel.style.display = "none";
+  if (item.id === "__cile__") {
+    if (window.showView) window.showView("cile");
+    return;
+  }
+  if (item.id !== activeThreadId) {
+    await switchThread(item.id);
+  }
+  updateThreadIndicator(item.id);
+}
+
+carouselPrevBtn.addEventListener("click", () => {
+  carouselPreview = (carouselPreview - 1 + carouselData.length) % carouselData.length;
+  renderCarousel();
+});
+carouselNextBtn.addEventListener("click", () => {
+  carouselPreview = (carouselPreview + 1) % carouselData.length;
+  renderCarousel();
+});
+
+let carouselDragStartY = null;
+let carouselDragStartX = null;
+let carouselIsDragging = false;
+carouselWrap.addEventListener("pointerdown", (e) => {
+  carouselDragStartY = e.clientY;
+  carouselDragStartX = e.clientX;
+  carouselIsDragging = false;
+});
+carouselWrap.addEventListener("pointermove", (e) => {
+  if (carouselDragStartY === null) return;
+  const dy = e.clientY - carouselDragStartY;
+  const dx = e.clientX - carouselDragStartX;
+  if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 8) {
+    carouselIsDragging = true;
+    e.preventDefault();
+  }
+});
+carouselWrap.addEventListener("pointerup", (e) => {
+  if (carouselDragStartY === null) return;
+  if (carouselIsDragging) {
+    const dy = e.clientY - carouselDragStartY;
+    if (dy < -36) { carouselPreview = (carouselPreview + 1) % carouselData.length; renderCarousel(); }
+    else if (dy > 36) { carouselPreview = (carouselPreview - 1 + carouselData.length) % carouselData.length; renderCarousel(); }
+  }
+  carouselDragStartY = null;
+  carouselDragStartX = null;
+  carouselIsDragging = false;
+});
 
 threadListToggle.addEventListener("click", () => {
   const willOpen = threadPanel.style.display === "none";
